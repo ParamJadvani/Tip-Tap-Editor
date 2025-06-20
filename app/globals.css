@@ -129,12 +129,115 @@
 }
 
 .tiptap {
-    /* Reset top margin for first child */
+    /* Reset top margin for the first child */
     *:first-child {
         margin-top: 0;
     }
 
-    /* Inline code styling */
+    /* Headings */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        line-height: 1.2;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        text-wrap: balance;
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-top: 3.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+        margin-top: 3.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+
+    h4 {
+        font-size: 1.15rem;
+    }
+
+    h5 {
+        font-size: 1rem;
+    }
+
+    h6 {
+        font-size: 0.95rem;
+    }
+
+    /* Lists */
+    ul,
+    ol {
+        padding-left: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    ul li {
+        list-style-type: disc;
+    }
+
+    ol li {
+        list-style-type: decimal;
+    }
+
+    ul li p,
+    ol li p {
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+    }
+
+    /* Task Lists */
+    ul[data-type="taskList"] {
+        list-style: none;
+        padding-left: 0;
+        margin: 1.5rem 0;
+    }
+
+    ul[data-type="taskList"] li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+
+    ul[data-type="taskList"] li > label {
+        flex: 0 0 auto;
+        margin-right: 0.5rem;
+        user-select: none;
+    }
+
+    ul[data-type="taskList"] li > div {
+        flex: 1 1 auto;
+    }
+
+    ul[data-type="taskList"] input[type="checkbox"] {
+        cursor: pointer;
+    }
+
+    ul[data-type="taskList"] ul[data-type="taskList"] {
+        margin: 0;
+    }
+
+    /* Blockquote */
+    blockquote {
+        border-left: 3px solid #ccc;
+        margin: 1.5rem 0;
+        padding-left: 1rem;
+        color: #444;
+        font-style: italic;
+    }
+
+    /* Inline Code */
     code {
         background-color: #f3e8ff;
         border-radius: 0.4rem;
@@ -144,25 +247,7 @@
         font-family: monospace;
     }
 
-    /* Marked/highlighted text */
-    mark {
-        background-color: #faf594;
-        border-radius: 0.4rem;
-        padding: 0.1rem 0.3rem;
-    }
-
-    /* Link styles */
-    a {
-        color: #7e3af2;
-        text-decoration: none;
-        transition: color 0.2s ease;
-    }
-
-    a:hover {
-        color: #5b21b6;
-    }
-
-    /* Code blocks */
+    /* Code Blocks */
     pre {
         background-color: #111;
         color: #fff;
@@ -180,7 +265,7 @@
         padding: 0;
     }
 
-    /* Syntax highlighting */
+    /* Syntax Highlighting */
     pre .hljs-comment,
     pre .hljs-quote {
         color: #616161;
@@ -232,62 +317,125 @@
         font-weight: 700;
     }
 
-    /* Headings */
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        line-height: 1.3;
-        margin-top: 2.5rem;
-        margin-bottom: 1rem;
-        font-weight: 600;
-        text-wrap: balance;
-    }
-
-    h1 {
-        font-size: 2rem;
-    }
-
-    h2 {
-        font-size: 1.6rem;
-    }
-
-    h3 {
-        font-size: 1.3rem;
-    }
-
-    h4 {
-        font-size: 1.15rem;
-    }
-
-    h5 {
-        font-size: 1rem;
-    }
-
-    h6 {
-        font-size: 0.95rem;
-    }
-
-    /* Blockquotes */
-    blockquote {
-        border-left: 3px solid #ccc;
-        padding-left: 1rem;
-        margin: 1.5rem 0;
-        color: #444;
-        font-style: italic;
-    }
-
-    /* Lists */
-    ul,
-    ol {
-        padding-left: 1.5rem;
+    /* Tables */
+    .tableWrapper {
+        overflow-x: auto;
         margin: 1.5rem 0;
     }
 
-    ul li p,
-    ol li p {
-        margin: 0.25em 0;
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
     }
+
+    table td,
+    table th {
+        border: 1px solid #000;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        vertical-align: top;
+        position: relative;
+    }
+
+    table td > *,
+    table th > * {
+        margin-bottom: 0;
+    }
+
+    table th {
+        background-color: #c7c7c7;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    table .selectedCell:after {
+        content: "";
+        background: #c7c7c8;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    table .column-resize-handle {
+        background-color: #7e3af2; /* fallback for var(--primary) */
+        position: absolute;
+        top: 0;
+        bottom: -2px;
+        right: -2px;
+        width: 4px;
+        pointer-events: none;
+    }
+
+    &.resize-cursor {
+        cursor: col-resize;
+    }
+
+    /* Images */
+    img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 1.5rem 0;
+    }
+
+    img.ProseMirror-selectednode {
+        outline: 3px solid #7e3af2; /* fallback for var(--primary) */
+    }
+
+    /* Links */
+    a {
+        color: dodgerblue;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Mark (highlighted text) */
+    mark {
+        background-color: #faf594;
+        border-radius: 0.4rem;
+        padding: 0.1rem 0.3rem;
+    }
+}
+
+.tiptap .mention {
+    background: #e0f7fa;
+    padding: 0 4px;
+    border-radius: 4px;
+}
+.tiptap mark {
+    border-radius: 0.4rem;
+    padding: 0.1rem 0.3rem;
+}
+.tiptap mark[data-color="yellow"] {
+    background-color: yellow;
+}
+.tiptap mark[data-color="green"] {
+    background-color: green;
+}
+.tiptap mark[data-color="blue"] {
+    background-color: blue;
+}
+.tiptap mark[data-color="pink"] {
+    background-color: pink;
+}
+.tiptap mark[data-color="orange"] {
+    background-color: orange;
+}
+.tiptap [style*="font-family: sans-serif"] {
+    font-family: sans-serif;
+}
+.tiptap [style*="font-family: serif"] {
+    font-family: serif;
+}
+.tiptap [style*="font-family: monospace"] {
+    font-family: monospace;
 }

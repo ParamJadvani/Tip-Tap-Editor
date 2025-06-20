@@ -1,13 +1,11 @@
 "use client";
 
-import TiptapEditor from '@/components/TiptapEditor';
+import TiptapEditor from '@/components/tip-tap-editor';
 
 export default function Home() {
   return (
     <main>
-      <div className="min-h-screen w-full bg-[#fafbfd] mx-auto">
-        <TiptapEditor />
-      </div>
+      <TiptapEditor />
     </main>
   );
 }
