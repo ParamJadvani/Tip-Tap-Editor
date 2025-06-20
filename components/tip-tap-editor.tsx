@@ -19,6 +19,8 @@ import Superscript from '@tiptap/extension-superscript';
 import Heading from '@tiptap/extension-heading';
 import Mention from '@tiptap/extension-mention';
 import useEditorStore from '@/store/use-editor-store';
+import { BubbleToolbar } from '@/components/bubble-menubar';
+import { EditorToolbar } from '@/components/toolbar';
 
 export default function TiptapEditor() {
     const { setEditor } = useEditorStore();
@@ -73,7 +75,7 @@ export default function TiptapEditor() {
     if (!editor) return null;
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-4 space-y-4">
+        <div className="w-full mx-auto p-4 space-y-4">
             <div className="sticky top-4 z-30 bg-white border border-gray-200 rounded-md shadow p-3">
                 <EditorToolbar editor={editor} />
             </div>
