@@ -15,14 +15,6 @@ import {
     TextIcon,
 } from "lucide-react";
 
-export const HIGHLIGHT_COLORS = [
-    { value: "yellow", label: "Yellow" },
-    { value: "green", label: "Green" },
-    { value: "blue", label: "Blue" },
-    { value: "pink", label: "Pink" },
-    { value: "orange", label: "Orange" },
-];
-
 export const FONT_FAMILIES = [
     { value: "sans-serif", label: "Sans Serif" },
     { value: "serif", label: "Serif" },
@@ -50,4 +42,28 @@ export const LIST_TYPES = [
     { value: "bullet", label: "Bullet List", icon: ListIcon },
     { value: "ordered", label: "Numbered List", icon: ListOrderedIcon },
     { value: "task", label: "Task List", icon: CheckSquareIcon },
+];
+
+export const TEXT_COLORS = [
+    { name: "Default", color: "#000000" },
+    { name: "Purple", color: "#9333EA" },
+    { name: "Red", color: "#E00000" },
+    { name: "Yellow", color: "#EAB308" },
+    { name: "Blue", color: "#2563EB" },
+    { name: "Green", color: "#008A00" },
+    { name: "Orange", color: "#FFA500" },
+    { name: "Pink", color: "#BA4081" },
+    { name: "Gray", color: "#A8A29E" },
+];
+
+export const HIGHLIGHT_COLORS = [
+    { name: "Default", color: "transparent" },
+    { name: "Purple", color: "#9333EA" },
+    { name: "Red", color: "#E00000" },
+    { name: "Yellow", color: "#EAB308" },
+    { name: "Blue", color: "#2563EB" },
+    { name: "Green", color: "#008A00" },
+    { name: "Orange", color: "#FFA500" },
+    { name: "Pink", color: "#BA4081" },
+    { name: "Gray", color: "#A8A29E" },
 ];
