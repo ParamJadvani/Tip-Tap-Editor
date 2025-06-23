@@ -1,11 +1,14 @@
+// app/page.tsx
 "use client";
-
-import TiptapEditor from '@/components/tip-tap-editor';
+import TiptapEditor from "@/components/editor/TipTapEditor";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export default function Home() {
-  return (
-    <main>
-      <TiptapEditor />
-    </main>
-  );
+    return (
+        <ThemeProvider>
+            <main>
+                <TiptapEditor />
+            </main>
+        </ThemeProvider>
+    );
 }

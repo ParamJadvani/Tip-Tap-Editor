@@ -3,13 +3,13 @@ import {
     AlignJustifyIcon,
     AlignLeftIcon,
     AlignRightIcon,
+    CheckSquareIcon,
     Heading1Icon,
     Heading2Icon,
     Heading3Icon,
     Heading4Icon,
     Heading5Icon,
     Heading6Icon,
-    ListChecksIcon,
     ListIcon,
     ListOrderedIcon,
     TextIcon,
@@ -49,5 +49,5 @@ export const ALIGNMENTS = [
 export const LIST_TYPES = [
     { value: "bullet", label: "Bullet List", icon: ListIcon },
     { value: "ordered", label: "Numbered List", icon: ListOrderedIcon },
-    { value: "task", label: "Task List", icon: ListChecksIcon },
+    { value: "task", label: "Task List", icon: CheckSquareIcon },
 ];
