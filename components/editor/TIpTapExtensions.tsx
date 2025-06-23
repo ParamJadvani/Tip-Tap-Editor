@@ -128,7 +128,7 @@ export function FormattingButtons({ editor }: { editor: Editor }) {
             <CustomToolTip content="Bold">
                 <Button
                     size="sm"
-                    variant={editor.isActive("bold") ? "secondary" : "ghost"}
+                    variant={editor.isActive("bold") ? "default" : "ghost"}
                     onClick={onBold}
                     aria-label="Bold"
                 >
@@ -138,7 +138,7 @@ export function FormattingButtons({ editor }: { editor: Editor }) {
             <CustomToolTip content="Italic">
                 <Button
                     size="sm"
-                    variant={editor.isActive("italic") ? "secondary" : "ghost"}
+                    variant={editor.isActive("italic") ? "default" : "ghost"}
                     onClick={onItalic}
                     aria-label="Italic"
                 >
@@ -148,7 +148,7 @@ export function FormattingButtons({ editor }: { editor: Editor }) {
             <CustomToolTip content="Underline">
                 <Button
                     size="sm"
-                    variant={editor.isActive("underline") ? "secondary" : "ghost"}
+                    variant={editor.isActive("underline") ? "default" : "ghost"}
                     onClick={onUnderline}
                     aria-label="Underline"
                 >
@@ -158,7 +158,7 @@ export function FormattingButtons({ editor }: { editor: Editor }) {
             <CustomToolTip content="Strikethrough">
                 <Button
                     size="sm"
-                    variant={editor.isActive("strike") ? "secondary" : "ghost"}
+                    variant={editor.isActive("strike") ? "default" : "ghost"}
                     onClick={onStrike}
                     aria-label="Strikethrough"
                 >
@@ -271,7 +271,7 @@ export function LinkButton({ editor }: { editor: Editor }) {
                 <DropdownMenuTrigger asChild>
                     <Button
                         size="sm"
-                        variant={editor.isActive("link") ? "secondary" : "ghost"}
+                        variant={editor.isActive("link") ? "default" : "ghost"}
                         aria-label="Insert or edit link"
                     >
                         <Link2 size={16} />

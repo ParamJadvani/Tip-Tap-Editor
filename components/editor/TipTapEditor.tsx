@@ -20,6 +20,7 @@ import Image from "@tiptap/extension-image";
 import useEditorStore from "@/store/use-editor-store";
 import TableHeader from "@tiptap/extension-table-header";
 import Youtube from "@tiptap/extension-youtube";
+import { Vimeo } from "@fourwaves/tiptap-extension-vimeo";
 import CharacterCount from "@tiptap/extension-character-count";
 import { DragHandle } from "@tiptap/extension-drag-handle";
 import { EditorToolbar } from "@/components/editor/EditorToolbar";
@@ -37,6 +38,7 @@ export default function TiptapEditor() {
         () => [
             StarterKit,
             Paragraph,
+            Vimeo,
             TaskList,
             TaskItem.configure({ nested: true }),
             Table.configure({ resizable: true }),
@@ -71,6 +73,7 @@ export default function TiptapEditor() {
     );
 
     const editor = useEditor({
+        immediatelyRender: false,
         extensions,
         content: "<p>Start writing here...</p>",
         editorProps: {
