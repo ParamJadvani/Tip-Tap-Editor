@@ -1,7 +1,7 @@
 // TipTapExtension.tsx
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Editor } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { CustomToolTip } from "@/components/ui/tooltip";
 
@@ -33,16 +34,18 @@ import {
     Youtube as YoutubeIcon,
     ChevronDownIcon,
     CheckIcon,
+    WrapTextIcon,
 } from "lucide-react";
 import {
     ALIGNMENTS,
-    FONT_FAMILIES,
+    ALL_GOOGLE_FONTS,
     HIGHLIGHT_COLORS,
     LIST_TYPES,
     TEXT_COLORS,
 } from "@/constants/editor-constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useTheme } from "@/context/ThemeContext";
+import { buildGoogleFontsUrl } from "@/lib/utils";
 
 /** Alignment Buttons */
 export function AlignmentButtons({ editor }: { editor: Editor }) {
@@ -89,13 +92,64 @@ export function ClearFormattingButton({ editor }: { editor: Editor }) {
     );
 }
 
-/** Font family selector */
+const BATCH_SIZE = 5;
+
 export function FontButtons({ editor }: { editor: Editor }) {
-    const onDefault = useCallback(() => editor.chain().focus().unsetFontFamily().run(), [editor]);
-    const onSet = useCallback(
-        (val: string) => editor.chain().focus().setFontFamily(val).run(),
+    const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+    const [selected, setSelected] = useState<string>("");
+    const loadedFonts = useRef(new Set<string>());
+
+    // Inject a <link> tag for this font if not already loaded
+    const loadFont = useCallback((font: (typeof ALL_GOOGLE_FONTS)[number]) => {
+        if (loadedFonts.current.has(font)) return;
+
+        const url = buildGoogleFontsUrl(font);
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url;
+        document.head.appendChild(link);
+
+        loadedFonts.current.add(font);
+    }, []);
+
+    // On mount, restore from localStorage and preload first batch
+    useEffect(() => {
+        const stored = localStorage.getItem("tiptap-font") as
+            | (typeof ALL_GOOGLE_FONTS)[number]
+            | null;
+        if (stored && ALL_GOOGLE_FONTS.includes(stored)) {
+            setSelected(stored);
+            loadFont(stored);
+            editor.chain().focus().setFontFamily(stored).run();
+        }
+
+        // preload first batch
+        ALL_GOOGLE_FONTS.slice(0, BATCH_SIZE).forEach(loadFont);
+    }, [editor, loadFont]);
+
+    // Whenever we expand the list, preload newly visible fonts
+    useEffect(() => {
+        ALL_GOOGLE_FONTS.slice(0, visibleCount).forEach(loadFont);
+    }, [visibleCount, loadFont]);
+
+    const onDefault = useCallback(() => {
+        setSelected("");
+        localStorage.removeItem("tiptap-font");
+        editor.chain().focus().unsetFontFamily().run();
+    }, [editor]);
+
+    const commit = useCallback(
+        (font: (typeof ALL_GOOGLE_FONTS)[number]) => {
+            setSelected(font);
+            localStorage.setItem("tiptap-font", font);
+            editor.chain().focus().setFontFamily(font).run();
+        },
         [editor]
     );
+
+    const handleLoadMore = useCallback(() => {
+        setVisibleCount((v) => Math.min(ALL_GOOGLE_FONTS.length, v + BATCH_SIZE));
+    }, []);
 
     return (
         <DropdownMenu>
@@ -104,13 +158,41 @@ export function FontButtons({ editor }: { editor: Editor }) {
                     Font
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48">
-                <DropdownMenuItem onSelect={onDefault}>Default</DropdownMenuItem>
-                {FONT_FAMILIES.map((f) => (
-                    <DropdownMenuItem key={f.value} onSelect={() => onSet(f.value)}>
-                        {f.label}
-                    </DropdownMenuItem>
-                ))}
+
+            <DropdownMenuContent className="w-48 p-0">
+                <div
+                    className="max-h-60 overflow-y-auto overflow-x-hidden"
+                    onScroll={(e) => {
+                        const el = e.currentTarget;
+                        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
+                            handleLoadMore();
+                        }
+                    }}
+                >
+                    <DropdownMenuItem onSelect={onDefault}>Default</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+
+                    {ALL_GOOGLE_FONTS.slice(0, visibleCount).map((font) => (
+                        <DropdownMenuItem
+                            key={font}
+                            onMouseEnter={() => loadFont(font)}
+                            onSelect={() => commit(font)}
+                            className={selected === font ? "font-bold" : ""}
+                            style={{ fontFamily: font }}
+                        >
+                            {font}
+                        </DropdownMenuItem>
+                    ))}
+
+                    {visibleCount < ALL_GOOGLE_FONTS.length && (
+                        <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={handleLoadMore}>
+                                Load More…
+                            </DropdownMenuItem>
+                        </>
+                    )}
+                </div>
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -496,7 +578,8 @@ export function YoutubeButton({ editor }: { editor: Editor }) {
         const width = Math.max(320, parseInt(w, 10)) || 640;
         const height = Math.max(180, parseInt(h, 10)) || 480;
         if (!url) return alert("Enter a valid URL");
-        editor.commands.setYoutubeVideo({ src: url, width, height });
+        const bool = editor.commands.setYoutubeVideo({ src: url, width, height });
+        if (!bool) editor.commands.insertVimeoVideo({ src: url });
         setUrl("");
         setW("640");
         setH("480");
@@ -534,6 +617,20 @@ export function YoutubeButton({ editor }: { editor: Editor }) {
                     </Button>
                 </DropdownMenuContent>
             </DropdownMenu>
+        </CustomToolTip>
+    );
+}
+
+export function HardBreakButton({ editor }: { editor: Editor }) {
+    const onApply = useCallback(() => {
+        editor.chain().focus().setHardBreak().run();
+    }, [editor]);
+
+    return (
+        <CustomToolTip content={<p>Hard Break</p>}>
+            <Button size="sm" variant="ghost" onClick={onApply} aria-label="Hard Break">
+                <WrapTextIcon size={18} />
+            </Button>
         </CustomToolTip>
     );
 }

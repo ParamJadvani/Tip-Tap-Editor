@@ -15,12 +15,6 @@ import {
     TextIcon,
 } from "lucide-react";
 
-export const FONT_FAMILIES = [
-    { value: "sans-serif", label: "Sans Serif" },
-    { value: "serif", label: "Serif" },
-    { value: "monospace", label: "Monospace" },
-];
-
 export const HEADINGS = [
     { value: "paragraph", label: "Normal Text", icon: TextIcon },
     { value: "h1", label: "Heading 1", icon: Heading1Icon },
@@ -67,3 +61,19 @@ export const HIGHLIGHT_COLORS = [
     { name: "Pink", color: "#BA4081" },
     { name: "Gray", color: "#A8A29E" },
 ];
+
+export const ALL_GOOGLE_FONTS = [
+    "Roboto",
+    "Open Sans",
+    "Lato",
+    "Montserrat",
+    "Oswald",
+    "Raleway",
+    "PT Sans",
+    "Merriweather",
+    "Ubuntu",
+    "Poppins",
+    "Noto Sans",
+    "Noto Serif",
+    "Noto Sans JP",
+] as const;

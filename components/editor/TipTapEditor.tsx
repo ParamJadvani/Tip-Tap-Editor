@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TaskItem from "@tiptap/extension-task-item";
@@ -24,6 +24,9 @@ import { Vimeo } from "@fourwaves/tiptap-extension-vimeo";
 import CharacterCount from "@tiptap/extension-character-count";
 import { DragHandle } from "@tiptap/extension-drag-handle";
 import { EditorToolbar } from "@/components/editor/EditorToolbar";
+import GlobalDragHandle from "tiptap-extension-global-drag-handle";
+import HardBreak from "@tiptap/extension-hard-break";
+import { VimeoVideo } from "@/extensions/VimeoVideo";
 import { debounce } from "lodash";
 
 export default function TiptapEditor() {
@@ -38,6 +41,9 @@ export default function TiptapEditor() {
         () => [
             StarterKit,
             Paragraph,
+            GlobalDragHandle,
+            HardBreak,
+            VimeoVideo,
             Vimeo,
             TaskList,
             TaskItem.configure({ nested: true }),
@@ -74,23 +80,19 @@ export default function TiptapEditor() {
 
     const editor = useEditor({
         immediatelyRender: false,
+        autofocus: true,
         extensions,
         content: "<p>Start writing here...</p>",
         editorProps: {
             attributes: {
-                class: "tiptap prose prose-sm sm:prose-base max-w-none p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-md min-h-[50vh] focus:outline-none",
+                class: "tiptap prose prose-sm sm:prose-base max-w-none p-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-md min-h-[50vh] focus:outline-none",
             },
         },
+        onUpdate: ({ editor }) => {
+            const html = editor.getHTML();
+            debouncedSetHtml(html);
+        },
     });
-
-    useEffect(() => {
-        if (!editor) return;
-        const handle = () => debouncedSetHtml(editor.getHTML());
-        editor.on("update", handle);
-        return () => {
-            editor.off("update", handle);
-        };
-    }, [editor, debouncedSetHtml]);
 
     if (!editor) return null;
 

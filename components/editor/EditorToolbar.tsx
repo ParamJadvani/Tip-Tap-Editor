@@ -23,13 +23,14 @@ import {
     ListButtons,
     AlignmentButtons,
     LinkButton,
-    FontButtons,
     TableButtons,
     ImageUploadButton,
     YoutubeButton,
     ClearFormattingButton,
     PreviewButton,
     ColorPickerButton,
+    FontButtons,
+    HardBreakButton,
 } from "@/components/editor/TIpTapExtensions";
 
 export function EditorToolbar({ editor }: { editor: Editor | null }) {
@@ -148,6 +149,7 @@ export function EditorToolbar({ editor }: { editor: Editor | null }) {
                     <ClearFormattingButton editor={editor} />
                     {/* replace HighlightColorButton */}
                     {/* <ColorMenuButton editor={editor} mode="highlight" /> */}
+                    <HardBreakButton editor={editor} />
                     <PreviewButton />
                 </div>
 
