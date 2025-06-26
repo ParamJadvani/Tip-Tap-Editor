@@ -292,7 +292,7 @@ export function ImageUploadButton({ editor }: { editor: Editor }) {
             const file = e.target.files?.[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
-            editor.chain().focus().setImage({ src: url }).run();
+            editor.chain().focus().setImageWithCaption({ src: url }).run();
         },
         [editor]
     );
@@ -439,7 +439,17 @@ export function TableButtons({ editor }: { editor: Editor }) {
         () => editor.commands.insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
         [editor]
     );
-    const onDelete = useCallback(() => editor.commands.deleteTable(), [editor]);
+    const onDelete = useCallback(() => {
+        // 4) Anything else: delete the current selection
+        return editor.chain().focus().deleteSelection().run();
+    }, [editor]);
+
+    // Disable the button when there's nothing sensible to delete
+    const canDelete =
+        editor.isActive("table") ||
+        editor.isActive("image") ||
+        editor.isActive("imageWithCaption") ||
+        !editor.state.selection.empty;
 
     return (
         <div className="flex gap-1">
@@ -449,12 +459,7 @@ export function TableButtons({ editor }: { editor: Editor }) {
                 </Button>
             </CustomToolTip>
             <CustomToolTip content={<p>Delete Table</p>}>
-                <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={onDelete}
-                    disabled={!editor.isActive("table")}
-                >
+                <Button size="sm" variant="ghost" onClick={onDelete} disabled={!canDelete}>
                     <Trash2 size={18} />
                 </Button>
             </CustomToolTip>

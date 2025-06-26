@@ -1,7 +1,8 @@
+// /components/editor/TiptapEditor.tsx
 "use client";
 
-import React, { useMemo } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import React, { useMemo, useRef } from "react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
@@ -27,10 +28,13 @@ import { EditorToolbar } from "@/components/editor/EditorToolbar";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 import HardBreak from "@tiptap/extension-hard-break";
 import { VimeoVideo } from "@/extensions/VimeoVideo";
+import ImageResize from "tiptap-extension-resize-image";
+import { ImageWithCaption } from "@/extensions/ImageWithCaption";
 import { debounce } from "lodash";
 
 export default function TiptapEditor() {
     const { setHtml } = useEditorStore();
+    const bubbleMenuRef = useRef<HTMLDivElement | null>(null);
 
     const debouncedSetHtml = useMemo(
         () => debounce((html: string) => setHtml(html), 300),
@@ -64,6 +68,8 @@ export default function TiptapEditor() {
                 allowBase64: true,
                 HTMLAttributes: { class: "tiptap-image" },
             }),
+            ImageResize,
+            ImageWithCaption.configure({ HTMLAttributes: { class: "tiptap-image" } }),
             Youtube.configure({ inline: false, width: 480, height: 480 }),
             DragHandle.configure({
                 locked: false,
@@ -101,6 +107,42 @@ export default function TiptapEditor() {
             <div className="sticky top-0 z-30 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700">
                 <EditorToolbar editor={editor} />
             </div>
+            <BubbleMenu
+                editor={editor}
+                element={bubbleMenuRef.current as HTMLDivElement}
+                shouldShow={({ state }) => {
+                    const { $from } = state.selection;
+                    const node = state.selection.node || $from.nodeAfter;
+                    return node?.type.name === "imageWithCaption";
+                }}
+                tippyOptions={{ duration: 100 }}
+            >
+                <div
+                    ref={bubbleMenuRef}
+                    className="bg-white dark:bg-gray-800 shadow rounded p-2 flex"
+                >
+                    <button
+                        className="btn-sm btn-outline"
+                        onClick={() => {
+                            const attrs = editor.getAttributes("imageWithCaption") as {
+                                caption?: string;
+                            };
+                            const current = attrs.caption || "";
+                            const newCaption = prompt("Enter caption:", current) || "";
+                            editor.commands.updateCaption(newCaption);
+                        }}
+                    >
+                        Edit Caption
+                    </button>
+
+                    <button
+                        className="btn-sm btn-destructive ml-2"
+                        onClick={() => editor.commands.removeCaption()}
+                    >
+                        Remove Caption
+                    </button>
+                </div>
+            </BubbleMenu>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-md p-2">
                 <EditorContent editor={editor} />
             </div>
