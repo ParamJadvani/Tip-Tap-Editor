@@ -1,5 +1,13 @@
+// app/layout.tsx
 import type { Metadata } from "next";
+import { DM_Sans } from "next/font/google";
+import { ThemeProvider } from "@/providers/theme-provider"; // Your ThemeProvider
 import "./globals.css";
+
+const dmSans = DM_Sans({
+    variable: "--font-dm-sans-mono",
+    subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -12,8 +20,17 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body>{children}</body>
+        <html lang="en" suppressHydrationWarning>
+            <body className={`${dmSans.variable} antialiased`}>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    {children}
+                </ThemeProvider>
+            </body>
         </html>
     );
 }
