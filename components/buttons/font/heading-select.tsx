@@ -1,30 +1,32 @@
 // toolbar/HeadingSelect.tsx
 import React from 'react';
-import { Editor } from '@tiptap/react';
 import { HEADINGS } from '@/constants/editor-constants';
 import { Level } from "@tiptap/extension-heading";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import useEditorStore from '@/store/use-editor-store';
 
-interface HeadingSelectProps {
-    editor: Editor;
-}
 
-export const HeadingSelect = ({ editor }: HeadingSelectProps) => {
+export const HeadingSelect = React.memo(() => {
+    const { editor } = useEditorStore();
     const setHeading = (value: string) => {
         if (value === 'paragraph') {
-            editor.chain().focus().setParagraph().run();
+            editor?.chain().focus().setParagraph().run();
         } else {
             const level = (Number(value.replace("h", "")) as Level) || 1;
-            editor.chain().focus().setNode("heading", { level }).run();
+            editor?.chain().focus().setNode("heading", { level }).run();
         }
     };
 
     const currentHeading = HEADINGS.find(
         (heading) =>
-            (heading.value === 'paragraph' && editor.isActive('paragraph')) ||
+            (heading.value === 'paragraph' && editor?.isActive('paragraph')) ||
             (heading.value.startsWith('heading') &&
-                editor.isActive('heading', { level: parseInt(heading.value.replace('heading', '')) }))
+                editor?.isActive('heading', { level: parseInt(heading.value.replace('heading', '')) }))
     )?.value || 'paragraph';
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <Select onValueChange={setHeading} defaultValue={currentHeading}>
@@ -41,4 +43,6 @@ export const HeadingSelect = ({ editor }: HeadingSelectProps) => {
             </SelectContent>
         </Select>
     );
-};
+});
+
+HeadingSelect.displayName = "HeadingSelect";

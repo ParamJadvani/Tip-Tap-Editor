@@ -1,19 +1,21 @@
 import React, { useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { Eraser } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CustomToolTip } from "@/components/ui/tooltip";
+import useEditorStore from '@/store/use-editor-store';
 
-interface ClearFormattingButtonProps {
-    editor: Editor;
-}
 
-export const ClearFormattingButton =({ editor }: ClearFormattingButtonProps) => {
+export const ClearFormattingButton =React.memo(() => {
+    const { editor } = useEditorStore();
     const onClear = useCallback(
-        () => editor.chain().focus().unsetAllMarks().clearNodes().run(),
+        () => editor?.chain().focus().unsetAllMarks().clearNodes().run(),
         [editor]
     );
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Clear formatting">
@@ -22,4 +24,6 @@ export const ClearFormattingButton =({ editor }: ClearFormattingButtonProps) => 
             </Button>
         </CustomToolTip>
     );
-}
+});
+
+ClearFormattingButton.displayName = "ClearFormattingButton";

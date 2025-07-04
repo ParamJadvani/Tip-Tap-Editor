@@ -1,26 +1,29 @@
 import React, { useCallback, useRef } from "react";
-import { Editor } from "@tiptap/react";
 import { ImagePlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CustomToolTip } from "@/components/ui/tooltip";
+import useEditorStore from '@/store/use-editor-store';
 
-interface ImageUploadButtonProps {
-    editor: Editor;
-}
 
-export const ImageUploadButton = ({ editor }: ImageUploadButtonProps) => {
+
+export const ImageUploadButton = React.memo(() => {
+    const { editor } = useEditorStore();
     const inputRef = useRef<HTMLInputElement>(null);
     const onUpload = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const file = e.target.files?.[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
-            editor.chain().focus().setImage({ src: url }).run();
+            editor?.chain().focus().setImage({ src: url }).run();
         },
         [editor]
     );
     const openPicker = useCallback(() => inputRef.current?.click(), []);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Upload image">
@@ -38,4 +41,6 @@ export const ImageUploadButton = ({ editor }: ImageUploadButtonProps) => {
             </span>
         </CustomToolTip>
     );
-}
+});
+
+ImageUploadButton.displayName = "ImageUploadButton";

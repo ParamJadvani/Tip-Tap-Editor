@@ -1,43 +1,45 @@
 import React, { useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { ChevronDownIcon, CheckIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HIGHLIGHT_COLORS, TEXT_COLORS } from "@/constants/editor-constants";
 import { CustomToolTip } from "@/components/ui/tooltip";
+import useEditorStore from '@/store/use-editor-store';
 
-interface ColorPickerButtonProps {
-    editor: Editor;
-}
 
-export const ColorPickerButton =({ editor }: ColorPickerButtonProps) => {
+export const ColorPickerButton = React.memo(() => {
     const  theme  = "light"
+    const { editor } = useEditorStore();
 
     const highlightTextColor = theme === "light" ? "#000" : "#fff";
 
     const activeText =
-        TEXT_COLORS.find((c) => editor.isActive("textStyle", { color: c.color })) ??
+        TEXT_COLORS.find((c) => editor?.isActive("textStyle", { color: c.color })) ??
         (theme === "light" ? TEXT_COLORS[0] : { name: "Default", color: "white" });
 
-    const unsetText = useCallback(() => editor.commands.unsetColor(), [editor]);
+    const unsetText = useCallback(() => editor?.commands.unsetColor(), [editor]);
     const applyText = useCallback(
         (color: string) => {
-            editor.commands.unsetColor();
-            editor.chain().focus().setColor(color).run();
+            editor?.commands.unsetColor();
+            editor?.chain().focus().setColor(color).run();
         },
         [editor]
     );
 
     const activeHighlight =
-        HIGHLIGHT_COLORS.find((c) => editor.isActive("highlight", { color: c.color })) ??
+        HIGHLIGHT_COLORS.find((c) => editor?.isActive("highlight", { color: c.color })) ??
         HIGHLIGHT_COLORS[0];
 
-    const unsetHighlight = useCallback(() => editor.commands.unsetHighlight(), [editor]);
+    const unsetHighlight = useCallback(() => editor?.commands.unsetHighlight(), [editor]);
     const applyHighlight = useCallback(
-        (color: string) => editor.chain().focus().setHighlight({ color }).run(),
+        (color: string) => editor?.chain().focus().setHighlight({ color }).run(),
         [editor]
     );
+
+    if(!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Text and highlight color">
@@ -120,4 +122,6 @@ export const ColorPickerButton =({ editor }: ColorPickerButtonProps) => {
             </Popover>
         </CustomToolTip>
     );
-}
+});
+
+ColorPickerButton.displayName = "ColorPickerButton";

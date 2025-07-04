@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Editor } from "@tiptap/react";
 import {
   AlignmentButtons,
   ClearFormattingButton,
@@ -22,47 +21,44 @@ import {
   YoutubeButton,
 } from "@/components/buttons";
 
-interface TipTapToolbarProps {
-  editor: Editor;
-}
 
-export function TipTapToolbar({ editor }: TipTapToolbarProps) {
+export function TipTapToolbar() {
   return (
     <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-lg">
-      <HistoryButtons editor={editor} />
+      <HistoryButtons  />
       <div className="toolbar-separator" />
 
       {/* Block-level Formatting Group */}
-      <HeadingSelect editor={editor} />
-      <ToggleCodeBlockButton editor={editor} />
-      <ToggleBlockquoteButton editor={editor} />
-      <InsertHorizontalRuleButton editor={editor} />
+      <HeadingSelect  />
+      <ToggleCodeBlockButton  />
+      <ToggleBlockquoteButton  />
+      <InsertHorizontalRuleButton  />
       <div className="toolbar-separator" />
 
       {/* Inline Formatting Group */}
-      <FormattingButtons editor={editor} />
+      <FormattingButtons  />
       <div className="toolbar-separator" />
 
-      <AlignmentButtons editor={editor} />
+      <AlignmentButtons  />
       <div className="toolbar-separator" />
 
       {/* Font & Color Group */}
-      <FontButtons editor={editor} />
-      <ColorPickerButton editor={editor} />
+      <FontButtons  />
+      <ColorPickerButton  />
       <div className="toolbar-separator" />
 
-      <ListButtons editor={editor} />
+      <ListButtons  />
       <div className="toolbar-separator" />
 
       {/* Media & Links Group */}
-      <ImageUploadButton editor={editor} />
-      <LinkButton editor={editor} />
-      <YoutubeButton editor={editor} />
+      <ImageUploadButton  />
+      <LinkButton  />
+      <YoutubeButton  />
       <div className="toolbar-separator" />
 
       {/* Table & Utility Group */}
-      <TableButtons editor={editor} />
-      <ClearFormattingButton editor={editor} />
+      <TableButtons />
+      <ClearFormattingButton  />
       <PreviewButton />
       <div className="toolbar-separator" />
 
@@ -70,7 +66,7 @@ export function TipTapToolbar({ editor }: TipTapToolbarProps) {
       <div className="ml-auto">
         {" "}
         {/* Use ml-auto to push to the right */}
-        <WordCountDisplay editor={editor} />
+        <WordCountDisplay  />
       </div>
     </div>
   );
