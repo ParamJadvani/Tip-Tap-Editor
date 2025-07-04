@@ -1,12 +1,13 @@
 // toolbar/WordCountDisplay.tsx
+import useEditorStore from '@/store/use-editor-store';
 import React from 'react';
-import { Editor } from '@tiptap/react';
 
-interface WordCountDisplayProps {
-    editor: Editor;
-}
 
-export const WordCountDisplay = ({ editor }: WordCountDisplayProps) => {
+export const WordCountDisplay = React.memo(() => {
+    const { editor } = useEditorStore();
+    if (!editor) {
+        return null;
+    }
     return (
         <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm">
             <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -17,4 +18,6 @@ export const WordCountDisplay = ({ editor }: WordCountDisplayProps) => {
             </span>
         </div>
     );
-};
+});
+
+WordCountDisplay.displayName = "WordCountDisplay";

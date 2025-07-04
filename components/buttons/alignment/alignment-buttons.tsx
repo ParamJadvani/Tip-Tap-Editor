@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { AlignLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,16 +10,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CustomToolTip } from "@/components/ui/tooltip";
 import { ALIGNMENTS } from "@/constants/editor-constants";
+import useEditorStore from '@/store/use-editor-store';
 
-interface AlignmentButtonsProps {
-    editor: Editor;
-}
 
-export const AlignmentButtons = ({ editor }: AlignmentButtonsProps) => {
+export const AlignmentButtons = React.memo(() => {
+    const { editor } = useEditorStore();
     const onSelect = useCallback(
-        (align: string) => editor.chain().focus().setTextAlign(align).run(),
+        (align: string) => editor?.chain().focus().setTextAlign(align).run(),
         [editor]
     );
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Text alignment">
@@ -45,4 +47,6 @@ export const AlignmentButtons = ({ editor }: AlignmentButtonsProps) => {
             </DropdownMenu>
         </CustomToolTip>
     );
-}
+});
+
+AlignmentButtons.displayName = "AlignmentButtons";

@@ -1,17 +1,20 @@
 import React, { useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { Undo2, Redo2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CustomToolTip } from "@/components/ui/tooltip";
+import useEditorStore from '@/store/use-editor-store';
 
-interface HistoryButtonsProps {
-    editor: Editor;
-}
 
-export const HistoryButtons = ({ editor }: HistoryButtonsProps) => {
-    const onUndo = useCallback(() => editor.chain().focus().undo().run(), [editor]);
-    const onRedo = useCallback(() => editor.chain().focus().redo().run(), [editor]);
+
+export const HistoryButtons = React.memo(() => {
+    const { editor } = useEditorStore();
+    const onUndo = useCallback(() => editor?.chain().focus().undo().run(), [editor]);
+    const onRedo = useCallback(() => editor?.chain().focus().redo().run(), [editor]);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <div className="flex gap-1">
@@ -20,7 +23,7 @@ export const HistoryButtons = ({ editor }: HistoryButtonsProps) => {
                     size="sm"
                     variant="ghost"
                     onClick={onUndo}
-                    // disabled={!editor.can().undo()}
+                    disabled={!editor.can().undo()}
                     aria-label="Undo"
                 >
                     <Undo2 size={18} />
@@ -31,7 +34,7 @@ export const HistoryButtons = ({ editor }: HistoryButtonsProps) => {
                     size="sm"
                     variant="ghost"
                     onClick={onRedo}
-                    // disabled={!editor.can().redo()}
+                    disabled={!editor.can().redo()}
                     aria-label="Redo"
                 >
                     <Redo2 size={18} />
@@ -39,4 +42,6 @@ export const HistoryButtons = ({ editor }: HistoryButtonsProps) => {
             </CustomToolTip>
         </div>
     );
-}
+});
+
+HistoryButtons.displayName = "HistoryButtons";

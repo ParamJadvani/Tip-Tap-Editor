@@ -148,24 +148,23 @@
     @apply bg-background text-foreground;
   }
 }
-
 /* === Base Editor Styling === */
 .tiptap {
-  background-color: var(--tiptap-bg);
+  /* Removed background-color */
   color: var(--tiptap-text);
-  border: 1px solid var(--tiptap-border);
-  border-radius: 0.5rem;
+  /* Removed border */
+  border-radius: 0; /* Changed to 0 for a sharper look */
   padding: 1.5rem;
   min-height: 550px;
-  box-shadow: var(--tiptap-shadow);
+  /* Removed box-shadow */
   line-height: 1.7;
-  transition: box-shadow 0.2s ease-in-out;
+  transition: none; /* Removed transition */
 }
 
 .tiptap:focus-within {
   outline: none;
-  border-color: var(--tiptap-link);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+  /* Removed border-color */
+  /* Removed box-shadow */
 }
 
 /* === Headings === */
@@ -173,11 +172,11 @@
 .tiptap h4, .tiptap h5, .tiptap h6 {
   font-weight: 700;
   line-height: 1.3;
-  margin: 2rem 0 1rem;
+  margin: 1.5rem 0 0.75rem; /* Reduced margin slightly for simplicity */
   color: var(--tiptap-heading);
 }
 
-.tiptap h1 { font-size: 2.25rem; margin-top: 3rem; }
+.tiptap h1 { font-size: 2.25rem; margin-top: 2.5rem; } /* Adjusted margin-top */
 .tiptap h2 { font-size: 2rem; }
 .tiptap h3 { font-size: 1.75rem; }
 .tiptap h4 { font-size: 1.5rem; }
@@ -190,21 +189,20 @@
 
 /* === Paragraphs === */
 .tiptap p {
-  margin: 1rem 0;
-  position: relative; /* Keep this for the hover menu positioning */
-  /* padding-left: 2rem; - Removed this, as GlobalDragHandle handles left spacing */
+  margin: 0.75rem 0; /* Reduced vertical margin */
+  position: relative;
   min-height: 1.5rem;
-  margin-left: 2rem;
+  margin-left: 2rem; /* Kept this as it's from TipTap extensions */
 }
 
 /* === Lists === */
 .tiptap ul, .tiptap ol {
   padding-left: 2rem;
-  margin: 1.5rem 0;
+  margin: 1rem 0; /* Reduced vertical margin */
 }
 
 .tiptap ul li, .tiptap ol li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem; /* Reduced vertical margin between list items */
 }
 
 .tiptap ul li { list-style: disc; }
@@ -218,7 +216,7 @@
 .tiptap ul[data-type="taskList"] li {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.4rem; /* Reduced margin */
   line-height: 1.5;
 }
 .tiptap ul[data-type="taskList"] label {
@@ -230,18 +228,18 @@
 /* === Blockquotes === */
 .tiptap blockquote {
   border-left: 4px solid var(--tiptap-blockquote-border);
-  background-color: var(--tiptap-blockquote-bg);
+  /* Removed background-color */
   color: var(--tiptap-muted);
   font-style: italic;
-  border-radius: 0.25rem;
+  border-radius: 0; /* Removed border-radius */
   padding: 0.75rem 0 0.75rem 1.5rem;
-  margin: 2rem 0;
+  margin: 1.5rem 0; /* Reduced vertical margin */
 }
 
 /* === Inline & Block Code === */
 .tiptap code {
-  background-color: var(--tiptap-code-bg);
-  color: #c026d3;
+  background-color: var(--tiptap-code-bg); /* Kept background for readability */
+  color: #c026d3; /* Kept specific code color */
   font-family: 'Fira Code', 'JetBrains Mono', monospace;
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
@@ -249,33 +247,33 @@
 }
 
 .tiptap pre {
-  background-color: var(--tiptap-code-bg);
+  background-color: var(--tiptap-code-bg); /* Kept background for readability */
   color: inherit;
-  border-radius: 0.5rem;
+  border-radius: 0; /* Removed border-radius */
   padding: 1rem 1.25rem;
   overflow-x: auto;
-  margin: 2.5rem 0;
+  margin: 1.5rem 0; /* Reduced vertical margin */
 }
 
 /* === Tables === */
 .tiptap .tableWrapper {
   overflow-x: auto;
-  margin: 2.5rem 0;
-  border: 1px solid var(--tiptap-border);
-  border-radius: 0.5rem;
+  margin: 1.5rem 0; /* Reduced vertical margin */
+  /* Removed border */
+  border-radius: 0; /* Removed border-radius */
 }
 .tiptap table {
   width: 100%;
   border-spacing: 0;
-  border-collapse: separate;
+  border-collapse: collapse; /* Changed to collapse for simpler borders */
 }
 .tiptap th, .tiptap td {
-  border: 1px solid var(--tiptap-border);
+  border: 1px solid var(--tiptap-border); /* Kept borders for table structure */
   padding: 0.8rem 1rem;
   text-align: left;
 }
 .tiptap th {
-  background-color: var(--tiptap-blockquote-bg);
+  /* Removed background-color */
   color: var(--tiptap-heading);
 }
 
@@ -283,14 +281,14 @@
 .tiptap img {
   max-width: 100%;
   height: auto;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin: 2rem auto;
+  border-radius: 0; /* Removed border-radius */
+  /* Removed box-shadow */
+  margin: 1.5rem auto; /* Reduced vertical margin */
   display: block;
 }
 .tiptap figure {
   text-align: center;
-  margin: 2rem auto;
+  margin: 1.5rem auto; /* Reduced vertical margin */
 }
 .tiptap figcaption {
   color: var(--tiptap-muted);
@@ -312,7 +310,7 @@
 
 /* === Mark / Highlight === */
 .tiptap mark {
-  background-color: var(--tiptap-highlight);
+  background-color: var(--tiptap-highlight); /* Kept background for highlight visibility */
   padding: 0.1em 0.3em;
   border-radius: 0.25rem;
 }
@@ -322,10 +320,10 @@
   position: relative;
   padding-bottom: 56.25%;
   height: 0;
-  margin: 2rem 0;
-  border-radius: 0.5rem;
+  margin: 1.5rem 0; /* Reduced vertical margin */
+  border-radius: 0; /* Removed border-radius */
   overflow: hidden;
-  box-shadow: var(--tiptap-shadow);
+  /* Removed box-shadow */
 }
 .tiptap div[data-youtube-video] iframe {
   position: absolute;
@@ -344,10 +342,10 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  background: var(--tiptap-bg);
-  border: 1px solid var(--tiptap-border);
-  border-radius: 0.375rem;
-  box-shadow: var(--tiptap-shadow);
+  /* Removed background */
+  /* Removed border */
+  border-radius: 0; /* Removed border-radius */
+  /* Removed box-shadow */
   z-index: 200;
   transition: opacity 0.2s, transform 0.2s;
   white-space: nowrap;
@@ -363,13 +361,13 @@
   border: none;
   color: var(--tiptap-muted);
   padding: 2px;
-  border-radius: 4px;
+  border-radius: 0; /* Removed border-radius */
   display: flex;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: none; /* Removed transition */
 }
 .hover-menu button:hover {
-  background-color: var(--tiptap-code-bg);
+  background-color: transparent; /* Changed to transparent */
   color: var(--tiptap-text);
 }
 
@@ -382,8 +380,8 @@
   pointer-events: none;
   height: 0;
 }
-/* Added Global Drag Handle Styling */
-/* This styling is specifically for the 'tiptap-extension-global-drag-handle' */
+/* Removed Global Drag Handle Styling, assuming it's handled by GlobalDragHandle extension
+   and not explicitly styled here. If you need it, you'd re-add a simplified version. */
 .drag-handle {
     position: fixed; /* Keep fixed for consistent positioning */
     opacity: 1; /* Always visible for now, adjust based on desired behavior (e.g., hover parent to show) */
@@ -399,26 +397,26 @@
     height: 1.5rem; /* Adjusted from 1.5rem to match the icon size */
     z-index: 50;
     cursor: grab;
-
-    /* These are variables you'd define in your CSS for colors */
-    &:hover {
-        background-color: var(--tiptap-code-bg); /* Using an existing variable for hover state */
-        transition: background-color 0.2s;
-    }
-
-    &:active {
-        background-color: var(--tiptap-border); /* Using an existing variable for active state */
-        transition: background-color 0.2s;
-        cursor: grabbing;
-    }
-
-    /* .hide class for potential programmatic hiding */
-    &.hide {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    @media screen and (max-width: 600px) {
+    z-index: 50;
+    /* Removed background-image (dots), border-radius, hover/active styles */
+    width: 1rem; /* Adjust width/height if necessary for functionality */
+    height: 1rem;
+    background-color: transparent; /* Ensure no background */
+    transition: none; /* No visual transition */
+}
+.drag-handle:hover {
+    /* No visual feedback on hover */
+    background-color: transparent;
+}
+.drag-handle:active {
+    /* No visual feedback on active */
+    background-color: transparent;
+    cursor: grabbing;
+}
+.drag-handle.hide {
+    opacity: 0;
+    pointer-events: none;
+     @media screen and (max-width: 600px) {
         display: none;
         pointer-events: none;
     }
@@ -428,29 +426,38 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' style='fill: rgba(255, 255, 255, 0.5)'%3E%3Cpath d='M3,2 C2.44771525,2 2,1.55228475 2,1 C2,0.44771525 2.44771525,0 3,0 C3.55228475,0 4,0.44771525 4,1 C4,1.55228475 3.55228475,2 3,2 Z M3,6 C2.44771525,6 2,5.55228475 2,5 C2,4.44771525 2.44771525,4 3,4 C3.55228475,4 4,4.44771525 4,5 C4,5.55228475 3.55228475,6 3,6 Z M3,10 C2.44771525,10 2,9.55228475 2,9 C2,8.44771525 2.44771525,8 3,8 C3.55228475,8 4,8.44771525 4,9 C4,9.55228475 3.55228475,10 3,10 Z M7,2 C6.44771525,2 6,1.55228475 6,1 C6,0.44771525 6.44771525,0 7,0 C7.55228475,0 8,0.44771525 8,1 C8,1.55228475 7.55228475,2 7,2 Z M7,6 C6.44771525,6 6,5.55228475 6,5 C6,4.44771525 6.44771525,4 7,4 C7.55228475,4 8,4.44771525 8,5 C8,5.55228475 7.55228475,6 7,6 Z M7,10 C6.44771525,10 6,9.55228475 6,9 C6,8.44771525 6.44771525,8 7,8 C7.55228475,8 8,8.44771525 8,9 C8,9.55228475 3.55228475,10 7,10 Z'%3E%3C/path%3E%3C/svg%3E");
 }
 
-.tippy-box {
-    max-width: 400px !important;
-    background-color: red; /* Kept your existing tippy-box style */
-}
 
-/* Ensure selected node outline is correct after drag handle removal */
+/* === Selection & Outline (Simplified) === */
 .ProseMirror:not(.dragging) .ProseMirror-selectednode {
     outline: none !important;
-    transition: background-color 0.2s;
+    transition: none; /* Removed transition */
     box-shadow: none;
+    background-color: rgba(37, 99, 235, 0.1); /* Simple highlight on selection */
 }
 
+/* === Tippy Box (Tooltip - Minimal) === */
+.tippy-box {
+    max-width: 400px !important;
+    background-color: #333; /* Dark background for tooltips */
+    color: #fff; /* White text for tooltips */
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* === Figure & Figcaption (Simplified) === */
 .tiptap figure {
-    margin: 2rem auto; /* Adjusted to match existing tiptap figure margin */
+    margin: 1.5rem auto; /* Simplified margin */
     text-align: center;
 }
 
 .tiptap figcaption {
-    margin-top: 0.75rem; /* Adjusted to match existing tiptap figcaption margin */
-    font-size: 0.875rem; /* Adjusted to match existing tiptap figcaption font-size */
-    color: var(--tiptap-muted); /* Using existing variable */
+    margin-top: 0.5rem; /* Simplified margin */
+    font-size: 0.875rem;
+    color: var(--tiptap-muted);
 }
 
 .dark .tiptap figcaption {
-    color: #aaa; /* Kept your dark mode figcaption color */
+    color: #aaa;
 }

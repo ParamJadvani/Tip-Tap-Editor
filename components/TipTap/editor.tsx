@@ -24,6 +24,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 // Media & Embed Extensions
 import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
+import ImageResize from "tiptap-extension-resize-image";
 
 // Table Extensions
 import Table from "@tiptap/extension-table";
@@ -39,14 +40,14 @@ import TaskList from "@tiptap/extension-task-list";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 
 // Custom Extensions
-import { HoverExtension } from "@/extensions/HoverExtension";
-import ImageResize from "tiptap-extension-resize-image";
+import { HoverExtension } from "@/extensions/hover";
+import {VimeoVideo} from "@/extensions/vimeo-video";
 
 // UI
 import { TipTapToolbar } from '@/components/TipTap/toolbar';
 
 const TiptapEditor = () => {
-    const { setHtml } = useEditorStore()
+    const { setHtml,setEditor } = useEditorStore()
 
     const extensions = useMemo(() => [
         StarterKit.configure({
@@ -97,6 +98,7 @@ const TiptapEditor = () => {
 
         // Custom Features
         HoverExtension,
+        VimeoVideo,
     ], []);
 
     const debouncedSetHtml = useMemo(
@@ -107,9 +109,13 @@ const TiptapEditor = () => {
     const editor = useEditor({
         immediatelyRender: false,
         extensions,
+        onCreate: ({ editor }) => {
+            setEditor(editor)
+        },
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
             debouncedSetHtml(html);
+            setEditor(editor);
         },
         content: `
             <h1>Blocknote UI Clone with TipTap</h1>
@@ -130,7 +136,7 @@ const TiptapEditor = () => {
 
     return (
         <div>
-            <TipTapToolbar editor={editor} />
+            <TipTapToolbar />
             <EditorContent editor={editor} />
         </div>
     );

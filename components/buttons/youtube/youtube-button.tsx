@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { Youtube as YoutubeIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,35 +9,40 @@ import {
     DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { CustomToolTip } from "@/components/ui/tooltip";
+import useEditorStore from '@/store/use-editor-store';
+import { toast } from 'sonner';
 
-interface YoutubeButtonProps {
-    editor: Editor;
-}
 
-export const YoutubeButton = ({ editor }: YoutubeButtonProps) => {
+export const YoutubeButton = React.memo(() => {
     const [url, setUrl] = useState("");
     const [width, setWidth] = useState("640");
     const [height, setHeight] = useState("480");
     const [open, setOpen] = useState(false);
+    const { editor } = useEditorStore();
 
     const onApply = useCallback(() => {
-        const parsedWidth = Math.max(320, parseInt(width, 10)) || 640;
-        const parsedHeight = Math.max(180, parseInt(height, 10)) || 480;
+        const parsedWidth = Math.max(320, (Number(width), 10)) || 640;
+        const parsedHeight = Math.max(180, (Number(height), 10)) || 480;
 
         if (!url || !url.trim()) {
-            alert("Please enter a valid YouTube or Vimeo URL.");
+            toast.error("Please enter a valid YouTube or Vimeo URL.");
             return;
         }
 
         // Attempt to set YouTube video
-        const success = editor.commands.setYoutubeVideo({ src: url, width: parsedWidth, height: parsedHeight });
+        const success = editor?.commands.setYoutubeVideo({ src: url, width: parsedWidth, height: parsedHeight });
 
         // If not a YouTube video, try Vimeo (if you have Vimeo extension enabled)
         if (!success) {
-            // Assuming you have a Vimeo extension with insertVimeoVideo command
-            // If not, remove this line or add the Vimeo extension
-            // success = editor.commands.insertVimeoVideo({ src: url, width: parsedWidth, height: parsedHeight });
-            alert("Could not embed video. Please check the URL (supports YouTube).");
+            const success = editor?.commands.insertVimeoVideo({ src: url, width: parsedWidth.toString(), height: parsedHeight.toString() });
+            setUrl("");
+            setWidth("640");
+            setHeight("480");
+            setOpen(false);
+
+            if (!success) {
+                toast.error("Please enter a valid YouTube or Vimeo URL.");
+            }
         }
 
         if (success) {
@@ -47,7 +51,11 @@ export const YoutubeButton = ({ editor }: YoutubeButtonProps) => {
             setHeight("480");
             setOpen(false);
         }
-    }, [editor.commands, url, width, height]);
+    }, [editor?.commands, url, width, height]);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Embed YouTube video">
@@ -86,4 +94,6 @@ export const YoutubeButton = ({ editor }: YoutubeButtonProps) => {
             </DropdownMenu>
         </CustomToolTip>
     );
-}
+});
+
+YoutubeButton.displayName = "YoutubeButton";

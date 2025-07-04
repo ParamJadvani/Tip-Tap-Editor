@@ -1,15 +1,16 @@
 // toolbar/ToggleCodeBlockButton.tsx
 import React from 'react';
-import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button'; // Adjust path as needed
 import { CustomToolTip } from '@/components/ui/tooltip'; // Adjust path as needed
 import { Code } from 'lucide-react';
+import useEditorStore from '@/store/use-editor-store';
 
-interface ToggleCodeBlockButtonProps {
-    editor: Editor;
-}
 
-export const ToggleCodeBlockButton = ({ editor }: ToggleCodeBlockButtonProps) => {
+export const ToggleCodeBlockButton = React.memo(() => {
+    const { editor } = useEditorStore();
+    if (!editor) {
+        return null;
+    }
     return (
         <CustomToolTip content="Toggle code block">
             <Button
@@ -22,4 +23,6 @@ export const ToggleCodeBlockButton = ({ editor }: ToggleCodeBlockButtonProps) =>
             </Button>
         </CustomToolTip>
     );
-};
+});
+
+ToggleCodeBlockButton.displayName = "ToggleCodeBlockButton";

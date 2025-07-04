@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Editor } from "@tiptap/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,17 +11,16 @@ import {
 import { CustomToolTip } from "@/components/ui/tooltip";
 import { ALL_GOOGLE_FONTS, FontName } from "@/constants/editor-constants";
 import { buildGoogleFontsUrl } from "@/lib/utils";
-
-interface FontButtonsProps {
-    editor: Editor;
-}
+import useEditorStore from '@/store/use-editor-store';
 
 const BATCH_SIZE = 5;
 
-export const FontButtons = ({ editor }: FontButtonsProps) => {
+export const FontButtons = React.memo(() => {
     const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
     const [selected, setSelected] = useState<string>("");
     const loadedFonts = useRef(new Set<string>());
+
+    const { editor } = useEditorStore();
 
     const loadFont = useCallback((font: string) => {
         if (loadedFonts.current.has(font)) return;
@@ -41,7 +39,7 @@ export const FontButtons = ({ editor }: FontButtonsProps) => {
         if (stored && ALL_GOOGLE_FONTS.includes(stored as FontName)) {
             setSelected(stored);
             loadFont(stored);
-            editor.chain().focus().setFontFamily(stored).run();
+            editor?.chain().focus().setFontFamily(stored).run();
         }
 
         ALL_GOOGLE_FONTS.slice(0, BATCH_SIZE).forEach(loadFont);
@@ -54,14 +52,14 @@ export const FontButtons = ({ editor }: FontButtonsProps) => {
     const onDefault = useCallback(() => {
         setSelected("");
         localStorage.removeItem("tiptap-font");
-        editor.chain().focus().unsetFontFamily().run();
+        editor?.chain().focus().unsetFontFamily().run();
     }, [editor]);
 
     const commit = useCallback(
         (font: string) => {
             setSelected(font);
             localStorage.setItem("tiptap-font", font);
-            editor.chain().focus().setFontFamily(font).run();
+            editor?.chain().focus().setFontFamily(font).run();
         },
         [editor]
     );
@@ -69,6 +67,10 @@ export const FontButtons = ({ editor }: FontButtonsProps) => {
     const handleLoadMore = useCallback(() => {
         setVisibleCount((v) => Math.min(ALL_GOOGLE_FONTS.length, v + BATCH_SIZE));
     }, []);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Font family">
@@ -125,4 +127,6 @@ export const FontButtons = ({ editor }: FontButtonsProps) => {
             </DropdownMenu>
         </CustomToolTip>
     );
-}
+})
+
+FontButtons.displayName = "FontButtons";

@@ -1,15 +1,17 @@
 // toolbar/ToggleBlockquoteButton.tsx
 import React from 'react';
-import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button'; // Adjust path as needed
 import { CustomToolTip } from '@/components/ui/tooltip'; // Adjust path as needed
 import { Quote } from 'lucide-react';
+import useEditorStore from '@/store/use-editor-store';
 
-interface ToggleBlockquoteButtonProps {
-    editor: Editor;
-}
 
-export const ToggleBlockquoteButton = ({ editor }: ToggleBlockquoteButtonProps) => {
+
+export const ToggleBlockquoteButton = React.memo(() => {
+    const { editor } = useEditorStore();
+    if (!editor) {
+        return null;
+    }
     return (
         <CustomToolTip content="Blockquote">
             <Button
@@ -22,4 +24,6 @@ export const ToggleBlockquoteButton = ({ editor }: ToggleBlockquoteButtonProps) 
             </Button>
         </CustomToolTip>
     );
-};
+});
+
+ToggleBlockquoteButton.displayName = "ToggleBlockquoteButton";

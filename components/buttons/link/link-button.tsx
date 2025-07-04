@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { Link2, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,20 +9,19 @@ import {
     DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { CustomToolTip } from "@/components/ui/tooltip";
+import useEditorStore from '@/store/use-editor-store';
 
-interface LinkButtonProps {
-    editor: Editor;
-}
 
-export const LinkButton = ({ editor }: LinkButtonProps) => {
+export const LinkButton = React.memo(() => {
     const [url, setUrl] = useState("");
     const [open, setOpen] = useState(false);
+    const { editor } = useEditorStore();
 
-    const getHref = useCallback(() => editor.getAttributes("link").href || "", [editor]);
+    const getHref = useCallback(() => editor?.getAttributes("link").href || "", [editor]);
     const onOpenChange = useCallback(
         (o: boolean) => {
             setOpen(o);
-            setUrl(o && editor.isActive("link") ? getHref() : "");
+            setUrl(o && editor?.isActive("link") ? getHref() : "");
         },
         [editor, getHref]
     );
@@ -32,8 +30,7 @@ export const LinkButton = ({ editor }: LinkButtonProps) => {
         if (href && !/^https?:\/\//i.test(href)) href = `https://${href}`;
         try {
             new URL(href); // Validate URL structure
-            editor
-                .chain()
+            editor?.chain()
                 .focus()
                 .toggleLink({ href: href || "" }) // Use href || "" to unset if empty
                 .run();
@@ -43,7 +40,11 @@ export const LinkButton = ({ editor }: LinkButtonProps) => {
             alert("Invalid URL. Please enter a valid URL.");
         }
     }, [editor, url]);
-    const onRemove = useCallback(() => editor.chain().focus().unsetLink().run(), [editor]);
+    const onRemove = useCallback(() => editor?.chain().focus().unsetLink().run(), [editor]);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="Insert/edit link">
@@ -83,4 +84,6 @@ export const LinkButton = ({ editor }: LinkButtonProps) => {
             </DropdownMenu>
         </CustomToolTip>
     );
-}
+});
+
+LinkButton.displayName = "LinkButton";

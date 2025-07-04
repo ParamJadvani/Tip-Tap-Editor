@@ -1,15 +1,17 @@
 // toolbar/InsertHorizontalRuleButton.tsx
 import React from 'react';
-import { Editor } from '@tiptap/react';
 import { Minus } from 'lucide-react';
 import { CustomToolTip } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import useEditorStore from '@/store/use-editor-store';
 
-interface InsertHorizontalRuleButtonProps {
-    editor: Editor;
-}
 
-export const InsertHorizontalRuleButton = ({ editor }: InsertHorizontalRuleButtonProps) => {
+
+export const InsertHorizontalRuleButton = React.memo(() => {
+    const { editor } = useEditorStore();
+    if (!editor) {
+        return null;
+    }
     return (
         <CustomToolTip content="Horizontal rule">
             <Button
@@ -23,4 +25,6 @@ export const InsertHorizontalRuleButton = ({ editor }: InsertHorizontalRuleButto
             </Button>
         </CustomToolTip>
     );
-};
+});
+
+InsertHorizontalRuleButton.displayName = "InsertHorizontalRuleButton";

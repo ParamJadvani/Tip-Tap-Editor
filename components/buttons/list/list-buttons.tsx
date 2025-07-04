@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { Editor } from "@tiptap/react";
 import { List } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,20 +10,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CustomToolTip } from "@/components/ui/tooltip";
 import { LIST_TYPES } from "@/constants/editor-constants";
+import useEditorStore from '@/store/use-editor-store';
 
-interface ListButtonsProps {
-    editor: Editor;
-}
-
-export const ListButtons = ({ editor }: ListButtonsProps) => {
+export const ListButtons = React.memo(() => {
+    const { editor } = useEditorStore();
     const onSelect = useCallback(
         (type: string) => {
-            if (type === "bullet") editor.chain().focus().toggleBulletList().run();
-            else if (type === "ordered") editor.chain().focus().toggleOrderedList().run();
-            else if (type === "task") editor.chain().focus().toggleTaskList().run(); // Ensure 'task' is handled
+            if (type === "bullet") editor?.chain().focus().toggleBulletList().run();
+            else if (type === "ordered") editor?.chain().focus().toggleOrderedList().run();
+            else if (type === "task") editor?.chain().focus().toggleTaskList().run(); // Ensure 'task' is handled
         },
         [editor]
     );
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <CustomToolTip content="List types">
@@ -53,4 +54,6 @@ export const ListButtons = ({ editor }: ListButtonsProps) => {
             </DropdownMenu>
         </CustomToolTip>
     );
-}
+});
+
+ListButtons.displayName = "ListButtons";
