@@ -62,7 +62,9 @@ export const HIGHLIGHT_COLORS = [
     { name: "Gray", color: "#A8A29E" },
 ];
 
-export const ALL_GOOGLE_FONTS = [
+export type FontName = "Roboto" | "Open Sans" | "Lato" | "Montserrat" | "Oswald" | "Raleway" | "PT Sans" | "Merriweather" | "Ubuntu" | "Poppins" | "Noto Sans" | "Noto Serif" | "Noto Sans JP";
+
+export const ALL_GOOGLE_FONTS: FontName[] = [
     "Roboto",
     "Open Sans",
     "Lato",
