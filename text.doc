@@ -1,0 +1,467 @@
+// components/buttons/integrated-button/button-style-toolbar.tsx
+import React, { FC, useCallback, useMemo, useEffect } from "react";
+import { Editor } from "@tiptap/react";
+import { Button } from "@/components/ui/button";
+import useEditorStore from "@/store/use-editor-store";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Palette, AlignLeft, AlignCenter, AlignRight, Ruler } from "lucide-react";
+import { NodeSelection } from "prosemirror-state";
+
+const SIZE_OPTIONS = ["sm", "md", "lg"] as const;
+const COLOR_OPTIONS = ["primary", "secondary", "destructive", "outline", "ghost", "link"] as const;
+const ALIGN_OPTIONS = ["left", "center", "right"] as const;
+
+type ButtonAttrs = {
+    id: string;
+    buttonSize: (typeof SIZE_OPTIONS)[number];
+    buttonColor: (typeof COLOR_OPTIONS)[number];
+    buttonAlignment: (typeof ALIGN_OPTIONS)[number];
+};
+
+const isCustomButtonSelected = (editor: Editor | null): boolean => {
+    if (!editor) return false;
+    const { selection } = editor.state;
+    if (selection instanceof NodeSelection && selection.node.type.name === "customButton") {
+        return true;
+    }
+    const direct = editor.state.doc.nodeAt(selection.from);
+    if (direct?.type.name === "customButton") return true;
+    const $from = selection.$from;
+    for (let d = $from.depth; d >= 0; d--) {
+        if ($from.node(d).type.name === "customButton") return true;
+    }
+    return false;
+};
+
+export const ButtonStylesToolbar: FC = React.memo(() => {
+    const { editor, activeCustomButtonNodeId, setActiveCustomButtonNodeId } = useEditorStore(
+        (s) => s
+    );
+
+    const isActive = useMemo(() => isCustomButtonSelected(editor), [activeCustomButtonNodeId]);
+
+    useEffect(() => {
+        if (!isActive && activeCustomButtonNodeId) {
+            setActiveCustomButtonNodeId(null);
+        }
+    }, [isActive, activeCustomButtonNodeId, setActiveCustomButtonNodeId]);
+
+    const attrs = useMemo<ButtonAttrs | null>(() => {
+        if (!editor || !activeCustomButtonNodeId) return null;
+        let found: ButtonAttrs | null = null;
+        editor.state.doc.descendants((node) => {
+            if (node.type.name === "customButton" && node.attrs.id === activeCustomButtonNodeId) {
+                found = node.attrs as ButtonAttrs;
+                return false;
+            }
+            return true;
+        });
+        return found;
+    }, [editor, activeCustomButtonNodeId]);
+
+    const update = useCallback(
+        (patch: Partial<ButtonAttrs>) => {
+            if (!editor) return;
+            editor.chain().focus().updateCustomButton(patch).run();
+        },
+        [editor]
+    );
+
+    if (!editor || !isActive || !attrs) return null;
+
+    const { buttonSize, buttonColor, buttonAlignment } = attrs;
+
+    return (
+        <div className="flex gap-2 p-1 border rounded-md bg-white shadow-sm">
+            <span className="text-sm font-medium mr-2 self-center">Button Styles:</span>
+
+            {/* Size */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                        <Ruler className="h-4 w-4 mr-2" />
+                        Size: {buttonSize.toUpperCase()}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuLabel>Button Size</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {SIZE_OPTIONS.map((size) => (
+                        <DropdownMenuItem key={size} onClick={() => update({ buttonSize: size })}>
+                            {size.charAt(0).toUpperCase() + size.slice(1)}
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Color */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                        <Palette className="h-4 w-4 mr-2" />
+                        Color: {buttonColor}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuLabel>Button Color</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {COLOR_OPTIONS.map((color) => (
+                        <DropdownMenuItem
+                            key={color}
+                            onClick={() => update({ buttonColor: color })}
+                        >
+                            {color.charAt(0).toUpperCase() + color.slice(1)}
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Alignment */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                        {buttonAlignment === "left" && <AlignLeft className="h-4 w-4 mr-2" />}
+                        {buttonAlignment === "center" && <AlignCenter className="h-4 w-4 mr-2" />}
+                        {buttonAlignment === "right" && <AlignRight className="h-4 w-4 mr-2" />}
+                        Align: {buttonAlignment.charAt(0).toUpperCase() + buttonAlignment.slice(1)}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuLabel>Button Alignment</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {ALIGN_OPTIONS.map((align) => (
+                        <DropdownMenuItem
+                            key={align}
+                            onClick={() => update({ buttonAlignment: align })}
+                        >
+                            {align.charAt(0).toUpperCase() + align.slice(1)}
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+    );
+});
+
+ButtonStylesToolbar.displayName = "ButtonStylesToolbar";
+
+import { Node, mergeAttributes } from "@tiptap/core";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import CustomButtonNodeView from "./CustomButtonNodeView";
+
+type ButtonSize = "sm" | "md" | "lg";
+type ButtonColor = "primary" | "secondary" | "destructive" | "outline" | "ghost" | "link";
+type ButtonAlignment = "left" | "center" | "right";
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        customButton: {
+            addCustomButton: (attrs?: {
+                label?: string;
+                id?: string;
+                buttonSize?: ButtonSize;
+                buttonColor?: ButtonColor;
+                buttonAlignment?: ButtonAlignment;
+            }) => ReturnType;
+            updateCustomButton: (attrs: {
+                label?: string;
+                buttonSize?: ButtonSize;
+                buttonColor?: ButtonColor;
+                buttonAlignment?: ButtonAlignment;
+            }) => ReturnType;
+        };
+    }
+}
+
+// /components/custom-node/CustomButton.ts
+export const CustomButton = Node.create({
+    name: "customButton",
+    group: "block",
+    atom: true,
+
+    addAttributes() {
+        return {
+            label: {
+                default: "New Button",
+                parseHTML: (el) => el.innerHTML,
+                renderHTML: (attrs) => ({
+                    "data-label": attrs.label || "",
+                }),
+            },
+            id: {
+                default: null,
+                parseHTML: (el) => el.getAttribute("data-id"),
+                renderHTML: (attrs) => ({
+                    "data-id": attrs.id || "",
+                }),
+            },
+            buttonSize: {
+                default: "md" as ButtonSize,
+                parseHTML: (el) => (el.getAttribute("data-size") as ButtonSize) || "md",
+                renderHTML: (attrs) => ({
+                    "data-size": attrs.buttonSize || "md",
+                }),
+            },
+            buttonColor: {
+                default: "primary" as ButtonColor,
+                parseHTML: (el) => (el.getAttribute("data-color") as ButtonColor) || "primary",
+                renderHTML: (attrs) => ({
+                    "data-color": attrs.buttonColor || "primary",
+                }),
+            },
+            buttonAlignment: {
+                default: "left" as ButtonAlignment,
+                parseHTML: (el) => (el.getAttribute("data-align") as ButtonAlignment) || "left",
+                renderHTML: (attrs) => ({
+                    "data-align": attrs.buttonAlignment || "left",
+                }),
+            },
+        };
+    },
+
+    parseHTML() {
+        return [
+            {
+                tag: 'button[data-type="custom-button"]',
+                getAttrs: (el) => ({
+                    label: el.getAttribute("data-label") || "Unnamed Button",
+                    id: el.getAttribute("data-id"),
+                    buttonSize: (el.getAttribute("data-size") as ButtonSize) || "md",
+                    buttonColor: (el.getAttribute("data-color") as ButtonColor) || "primary",
+                    buttonAlignment: (el.getAttribute("data-align") as ButtonAlignment) || "left",
+                }),
+            },
+        ];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        const {
+            "data-id": id,
+            "data-label": label = "New Button",
+            "data-size": size = "md",
+            "data-color": color = "primary",
+            "data-align": align = "left",
+            style,
+        } = HTMLAttributes as Record<string, string>;
+        // inline style to preserve alignment on getHTML()
+        const mergedStyle = `${style || ""};text-align:${align};display:inline-block`;
+        return [
+            "button",
+            mergeAttributes(HTMLAttributes, {
+                "data-type": "custom-button",
+                "data-id": id,
+                "data-label": label,
+                "data-size": size,
+                "data-color": color,
+                "data-align": align,
+                class: `btn btn-${size} btn-${color} btn-align-${align}`,
+                style: mergedStyle,
+                onclick: `console.log(${JSON.stringify(id)})`,
+            }),
+            label,
+        ];
+    },
+
+    addCommands() {
+        return {
+            addCustomButton:
+                (attrs = {}) =>
+                ({ chain }) => {
+                    return chain()
+                        .insertContent({
+                            type: this.name,
+                            attrs: {
+                                label: attrs.label,
+                                id:
+                                    attrs.id ??
+                                    `btn-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                                buttonSize: attrs.buttonSize ?? "md",
+                                buttonColor: attrs.buttonColor ?? "primary",
+                                buttonAlignment: attrs.buttonAlignment ?? "left",
+                            },
+                        })
+                        .run();
+                },
+            updateCustomButton:
+                (attrs) =>
+                ({ editor, tr }) => {
+                    const { from, to, empty } = editor.state.selection;
+
+                    if (empty) {
+                        const node = editor.state.doc.nodeAt(from);
+                        if (node && node.type.name === this.name) {
+                            return editor.commands.setNode(this.name, {
+                                ...node.attrs,
+                                ...attrs,
+                            });
+                        }
+                    }
+
+                    let updated = false;
+                    editor.state.doc.nodesBetween(from, to, (node, pos) => {
+                        if (node.type.name === this.name) {
+                            tr.setNodeMarkup(pos, undefined, {
+                                ...node.attrs,
+                                ...attrs,
+                            });
+                            updated = true;
+                        }
+                    });
+
+                    return updated;
+                },
+        };
+    },
+
+    addNodeView() {
+        return ReactNodeViewRenderer(CustomButtonNodeView);
+    },
+});
+
+// /components/custom-node/CustomButtonNodeView.tsx
+import React, { FC, useState, useEffect, useCallback, useMemo, memo } from "react";
+import { NodeViewWrapper, NodeViewContent, NodeViewProps } from "@tiptap/react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { TextCursor } from "lucide-react";
+import useEditorStore from "@/store/use-editor-store";
+import { NodeSelection } from "@tiptap/pm/state";
+
+type ButtonSize = "sm" | "md" | "lg";
+type ButtonColor = "primary" | "secondary" | "destructive" | "outline" | "ghost" | "link";
+type ButtonAlignment = "left" | "center" | "right";
+
+const CustomButtonNodeViewInner: FC<NodeViewProps> = ({
+    node,
+    updateAttributes,
+    deleteNode,
+    editor,
+    getPos,
+}) => {
+    const [label, setLabel] = useState(node.attrs.label);
+    const [editing, setEditing] = useState(false);
+    const id: string = node.attrs.id;
+    const size: ButtonSize = node.attrs.buttonSize;
+    const color: ButtonColor = node.attrs.buttonColor;
+    const align: ButtonAlignment = node.attrs.buttonAlignment;
+
+    const { activeCustomButtonNodeId, setActiveCustomButtonNodeId } = useEditorStore();
+    const isSelected = activeCustomButtonNodeId === id;
+    const [popoverOpen, setPopoverOpen] = useState(false);
+
+    useEffect(() => {
+        setLabel(node.attrs.label);
+    }, [node.attrs.label]);
+
+    const apply = useCallback(() => {
+        updateAttributes({ label });
+        setEditing(false);
+    }, [label, updateAttributes]);
+
+    const selectNode = useCallback(() => {
+        const pos = getPos();
+        if (typeof pos === "number") {
+            const sel = editor.state.selection;
+            if (!(sel instanceof NodeSelection && sel.node.attrs.id === id)) {
+                editor.commands.setNodeSelection(pos);
+            }
+        }
+        setActiveCustomButtonNodeId(id);
+        setPopoverOpen(true);
+    }, [editor, getPos, id, setActiveCustomButtonNodeId]);
+
+    const previewClick = useCallback(() => {
+        console.log(id);
+    }, [id]);
+
+    const btnCls = useMemo(
+        () =>
+            cn(
+                "inline-flex items-center justify-center gap-1 rounded-md px-3 py-1 text-sm font-medium",
+                `btn-size-${size}`,
+                `btn-color-${color}`
+            ),
+        [size, color]
+    );
+
+    const wrapperCls = useMemo(
+        () =>
+            cn("w-full", {
+                "text-left": align === "left",
+                "text-center": align === "center",
+                "text-right": align === "right",
+                "border-2 border-blue-500 p-1 rounded": isSelected,
+            }),
+        [align, isSelected]
+    );
+
+    return (
+        <NodeViewWrapper className={wrapperCls} data-button-id={id} onClick={selectNode}>
+            <div contentEditable={false} suppressContentEditableWarning>
+                {editing ? (
+                    <div className="p-2 border bg-gray-50 rounded space-y-2">
+                        <input
+                            className="w-full border rounded px-2 py-1"
+                            value={label}
+                            onChange={(e) => setLabel(e.target.value)}
+                        />
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
+                                Cancel
+                            </Button>
+                            <Button size="sm" onClick={apply}>
+                                Apply
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button className={btnCls} onClick={previewClick}>
+                                {label}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="flex gap-1 p-1">
+                            <Button size="icon" variant="outline" onClick={() => setEditing(true)}>
+                                ✏️
+                            </Button>
+                            <Button
+                                size="icon"
+                                variant="destructive"
+                                onClick={() => {
+                                    deleteNode();
+                                    setPopoverOpen(false);
+                                }}
+                            >
+                                🗑️
+                            </Button>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setPopoverOpen(false)}
+                            >
+                                ❌
+                            </Button>
+                            {!isSelected && (
+                                <Button size="icon" variant="outline" onClick={selectNode}>
+                                    <TextCursor className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </PopoverContent>
+                    </Popover>
+                )}
+            </div>
+            <NodeViewContent />
+        </NodeViewWrapper>
+    );
+};
+
+export default memo(CustomButtonNodeViewInner);
