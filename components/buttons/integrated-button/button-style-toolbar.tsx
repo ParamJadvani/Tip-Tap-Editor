@@ -1,153 +1,182 @@
 // components/buttons/integrated-button/button-style-toolbar.tsx
-import React, { FC, useCallback, useMemo, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Editor } from "@tiptap/react";
 import { Button } from "@/components/ui/button";
 import useEditorStore from "@/store/use-editor-store";
 import {
     DropdownMenu,
-    DropdownMenuTrigger,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuItem,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Palette, AlignLeft, AlignCenter, AlignRight, Ruler } from "lucide-react";
-import { NodeSelection } from "prosemirror-state";
+import { ButtonAlignment, ButtonColor, ButtonSize } from "@/extensions/custom-node/CustomButton";
 
-const SIZE_OPTIONS = ["sm", "md", "lg"] as const;
-const COLOR_OPTIONS = ["primary", "secondary", "destructive", "outline", "ghost", "link"] as const;
-const ALIGN_OPTIONS = ["left", "center", "right"] as const;
-
-type ButtonAttrs = {
-    id: string;
-    buttonSize: (typeof SIZE_OPTIONS)[number];
-    buttonColor: (typeof COLOR_OPTIONS)[number];
-    buttonAlignment: (typeof ALIGN_OPTIONS)[number];
-};
-
-const isCustomButtonSelected = (editor: Editor | null): boolean => {
+const isCustomButtonSelected = (editor: Editor | null) => {
     if (!editor) return false;
     const { selection } = editor.state;
-    if (selection instanceof NodeSelection && selection.node.type.name === "customButton") {
+    const { from } = selection;
+
+    const node = editor.state.doc.nodeAt(from);
+
+    // If the node at the cursor is a custom button
+    if (node && node.type.name === "customButton") {
         return true;
     }
-    const direct = editor.state.doc.nodeAt(selection.from);
-    if (direct?.type.name === "customButton") return true;
-    const $from = selection.$from;
-    for (let d = $from.depth; d >= 0; d--) {
-        if ($from.node(d).type.name === "customButton") return true;
-    }
-    return false;
+
+    let isSelectedInNode = false;
+    editor.state.doc.nodesBetween(selection.from, selection.to, (node) => {
+        if (node.type.name === "customButton") {
+            isSelectedInNode = true;
+            return false;
+        }
+    });
+
+    return isSelectedInNode;
 };
 
-export const ButtonStylesToolbar: FC = React.memo(() => {
-    const { editor, activeCustomButtonNodeId, setActiveCustomButtonNodeId } = useEditorStore(
-        (s) => s
+export const ButtonStylesToolbar = () => {
+    const { editor, activeCustomButtonNodeId, setActiveCustomButtonNodeId } = useEditorStore();
+
+    const selectedNode = activeCustomButtonNodeId
+        ? editor?.state.doc.nodeAt(
+              editor.view?.posAtDOM(
+                  editor.view.dom.querySelector(`[data-button-id="${activeCustomButtonNodeId}"]`) ||
+                      document.body,
+                  0
+              )
+          )
+        : null;
+
+    const currentSize = selectedNode?.attrs.buttonSize || "md";
+    const currentColor = selectedNode?.attrs.buttonColor || "primary";
+    const currentAlignment = selectedNode?.attrs.buttonAlignment || "left";
+
+    const updateButton = useCallback(
+        (attrs: {
+            label?: string | undefined;
+            buttonSize?: ButtonSize | undefined;
+            buttonColor?: ButtonColor;
+            buttonAlignment?: ButtonAlignment;
+        }) => {
+            if (editor && activeCustomButtonNodeId) {
+                editor.chain().focus().updateCustomButton(attrs).run();
+            }
+        },
+        [editor, activeCustomButtonNodeId]
     );
 
-    const isActive = useMemo(() => isCustomButtonSelected(editor), [activeCustomButtonNodeId]);
+    const isButtonActive = isCustomButtonSelected(editor);
 
     useEffect(() => {
-        if (!isActive && activeCustomButtonNodeId) {
+        if (!isButtonActive && activeCustomButtonNodeId) {
             setActiveCustomButtonNodeId(null);
         }
-    }, [isActive, activeCustomButtonNodeId, setActiveCustomButtonNodeId]);
+    }, [isButtonActive, activeCustomButtonNodeId, setActiveCustomButtonNodeId]);
 
-    const attrs = useMemo<ButtonAttrs | null>(() => {
-        if (!editor || !activeCustomButtonNodeId) return null;
-        let found: ButtonAttrs | null = null;
-        editor.state.doc.descendants((node) => {
-            if (node.type.name === "customButton" && node.attrs.id === activeCustomButtonNodeId) {
-                found = node.attrs as ButtonAttrs;
-                return false;
-            }
-            return true;
-        });
-        return found;
-    }, [editor, activeCustomButtonNodeId]);
-
-    const update = useCallback(
-        (patch: Partial<ButtonAttrs>) => {
-            if (!editor) return;
-            editor.chain().focus().updateCustomButton(patch).run();
-        },
-        [editor]
-    );
-
-    if (!editor || !isActive || !attrs) return null;
-
-    const { buttonSize, buttonColor, buttonAlignment } = attrs;
+    if (!editor || !isButtonActive) {
+        return null;
+    }
 
     return (
         <div className="flex gap-2 p-1 border rounded-md bg-white shadow-sm">
-            <span className="text-sm font-medium mr-2 self-center">Button Styles:</span>
-
-            {/* Size */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
-                        <Ruler className="h-4 w-4 mr-2" />
-                        Size: {buttonSize.toUpperCase()}
+                        Button Styles
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuLabel>Button Size</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {SIZE_OPTIONS.map((size) => (
-                        <DropdownMenuItem key={size} onClick={() => update({ buttonSize: size })}>
-                            {size.charAt(0).toUpperCase() + size.slice(1)}
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    {/* SIZE SUBMENU */}
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            <Ruler className="h-4 w-4 mr-2" />
+                            Size: {currentSize.toUpperCase()}
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                            <DropdownMenuLabel>Button Size</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => updateButton({ buttonSize: "sm" })}>
+                                Small
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateButton({ buttonSize: "md" })}>
+                                Medium
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateButton({ buttonSize: "lg" })}>
+                                Large
+                            </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                    </DropdownMenuSub>
 
-            {/* Color */}
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                        <Palette className="h-4 w-4 mr-2" />
-                        Color: {buttonColor}
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuLabel>Button Color</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {COLOR_OPTIONS.map((color) => (
-                        <DropdownMenuItem
-                            key={color}
-                            onClick={() => update({ buttonColor: color })}
-                        >
-                            {color.charAt(0).toUpperCase() + color.slice(1)}
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    {/* COLOR SUBMENU */}
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            <Palette className="h-4 w-4 mr-2" />
+                            Color: {currentColor}
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                            <DropdownMenuLabel>Button Color</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {[
+                                "primary",
+                                "secondary",
+                                "destructive",
+                                "outline",
+                                "ghost",
+                                "link",
+                            ].map((color) => (
+                                <DropdownMenuItem
+                                    key={color}
+                                    onClick={() =>
+                                        updateButton({ buttonColor: color as ButtonColor })
+                                    }
+                                >
+                                    {color.charAt(0).toUpperCase() + color.slice(1)}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuSubContent>
+                    </DropdownMenuSub>
 
-            {/* Alignment */}
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                        {buttonAlignment === "left" && <AlignLeft className="h-4 w-4 mr-2" />}
-                        {buttonAlignment === "center" && <AlignCenter className="h-4 w-4 mr-2" />}
-                        {buttonAlignment === "right" && <AlignRight className="h-4 w-4 mr-2" />}
-                        Align: {buttonAlignment.charAt(0).toUpperCase() + buttonAlignment.slice(1)}
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuLabel>Button Alignment</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {ALIGN_OPTIONS.map((align) => (
-                        <DropdownMenuItem
-                            key={align}
-                            onClick={() => update({ buttonAlignment: align })}
-                        >
-                            {align.charAt(0).toUpperCase() + align.slice(1)}
-                        </DropdownMenuItem>
-                    ))}
+                    {/* ALIGNMENT SUBMENU */}
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            {currentAlignment === "left" && <AlignLeft className="h-4 w-4 mr-2" />}
+                            {currentAlignment === "center" && (
+                                <AlignCenter className="h-4 w-4 mr-2" />
+                            )}
+                            {currentAlignment === "right" && (
+                                <AlignRight className="h-4 w-4 mr-2" />
+                            )}
+                            Align:{" "}
+                            {currentAlignment.charAt(0).toUpperCase() + currentAlignment.slice(1)}
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                            <DropdownMenuLabel>Button Alignment</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => updateButton({ buttonAlignment: "left" })}
+                            >
+                                <AlignLeft className="h-4 w-4 mr-2" /> Left
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => updateButton({ buttonAlignment: "center" })}
+                            >
+                                <AlignCenter className="h-4 w-4 mr-2" /> Center
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => updateButton({ buttonAlignment: "right" })}
+                            >
+                                <AlignRight className="h-4 w-4 mr-2" /> Right
+                            </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                    </DropdownMenuSub>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     );
-});
-
-ButtonStylesToolbar.displayName = "ButtonStylesToolbar";
+};

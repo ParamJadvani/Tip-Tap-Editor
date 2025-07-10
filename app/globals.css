@@ -580,23 +580,8 @@ button[data-type="custom-button"][data-color="link"]:hover {
     text-decoration: underline;
 }
 
-/* Alignment */
-/* For 'center' and 'right', the button needs to be block-level within its parent div
-   or its parent div needs text-align.
-   The `makePreviewButtonsClickable` function now sets text-align on the parent div.
-*/
-div[data-type="custom-button"] {
-    /* This div is the wrapper for the button in the HTML */
+
+div[data-type="custom-button"] { /* This div is the wrapper for the button in the HTML */
     display: block; /* Make it a block element to control alignment of its content */
     margin: 5px 0; /* Add vertical margin to block elements */
 }
-
-/* This is handled by text-align on the parent div, not on the button directly */
-/* button[data-type="custom-button"][data-align="center"] {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-button[data-type="custom-button"][data-align="right"] {
-    margin-left: auto;
-} */

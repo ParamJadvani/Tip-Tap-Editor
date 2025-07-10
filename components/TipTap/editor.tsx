@@ -42,7 +42,7 @@ import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 // Custom Extensions
 import { HoverExtension } from "@/extensions/hover";
 import { VimeoVideo } from "@/extensions/vimeo-video";
-import { CustomButton } from "@/components/custom-node/CustomButton";
+import { CustomButton } from "@/extensions/custom-node/CustomButton";
 
 // UI
 import { TipTapToolbar } from "@/components/TipTap/toolbar";
