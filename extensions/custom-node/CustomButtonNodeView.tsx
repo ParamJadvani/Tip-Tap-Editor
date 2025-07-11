@@ -70,14 +70,13 @@ const CustomButtonNodeView: FC<NodeViewProps> = ({
         };
 
         const colorClasses = {
-            primary: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-            secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-            destructive:
-                "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+            primary: "bg-[#0f172a] text-[#f9fafb] shadow hover:bg-[#0f172a]/90",
+            secondary: "bg-[#f9fafb] text-[#0f172a] shadow-sm hover:bg-[#f9fafb]/80",
+            destructive: "bg-[#ef4444]  text-[#f9fafb] shadow-sm hover:bg-destructive/90",
             outline:
-                "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-            ghost: "hover:bg-accent hover:text-accent-foreground",
-            link: "text-primary underline-offset-4 hover:underline",
+                "border border-input bg-white text-[#0f172a] shadow-sm hover:bg-accent hover:text text-[#0f172a]",
+            ghost: "hover:bg-[#f1f5f9] hover:text-[#0f172a] text-[#0f172a] bg-transparent",
+            link: "text-[#0f172a] underline-offset-4 hover:underline hover:bg-transparent bg-transparent",
         };
 
         const alignWrapperClasses = {

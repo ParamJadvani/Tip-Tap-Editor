@@ -50,23 +50,24 @@ export const CustomButton = Node.create({
             },
             buttonSize: {
                 default: "md" as ButtonSize,
-                parseHTML: (element) => element.getAttribute("data-size") as ButtonSize,
-                renderHTML: (attributes) => ({
-                    "data-size": attributes.buttonSize || "md",
+                parseHTML: (el) => el.getAttribute("data-size") as ButtonSize,
+                renderHTML: (attrs) => ({
+                    "data-size": attrs.buttonSize || "md",
                 }),
             },
             buttonColor: {
                 default: "primary" as ButtonColor,
-                parseHTML: (element) => element.getAttribute("data-color") as ButtonColor,
-                renderHTML: (attributes) => ({
-                    "data-color": attributes.buttonColor || "primary",
+                parseHTML: (el) => el.getAttribute("data-color") as ButtonColor,
+                renderHTML: (attrs) => ({
+                    "data-color": attrs.buttonColor || "primary",
                 }),
             },
             buttonAlignment: {
                 default: "left" as ButtonAlignment,
-                parseHTML: (element) => element.getAttribute("data-align") as ButtonAlignment,
-                renderHTML: (attributes) => ({
-                    "data-align": attributes.buttonAlignment || "left",
+                // parseHTML will be handled in parseHTML()
+                parseHTML: () => null,
+                renderHTML: (attrs) => ({
+                    "data-align": attrs.buttonAlignment || "left",
                 }),
             },
         };
@@ -75,42 +76,44 @@ export const CustomButton = Node.create({
     parseHTML() {
         return [
             {
-                tag: 'button[data-type="custom-button"]',
-                getAttrs: (el) => {
-                    const label = el.getAttribute("data-label") || "Unnamed Button";
-                    const id = el.getAttribute("data-id");
-                    const buttonSize = (el.getAttribute("data-size") as ButtonSize) || "md";
-                    const buttonColor = (el.getAttribute("data-color") as ButtonColor) || "primary";
-                    const buttonAlignment =
-                        (el.getAttribute("data-align") as ButtonAlignment) || "left";
-                    return { label, id, buttonSize, buttonColor, buttonAlignment };
+                tag: "div[data-align]",
+                getAttrs: (wrapper) => {
+                    const align = (wrapper.getAttribute("data-align") || "left") as ButtonAlignment;
+                    const btn = wrapper.querySelector(
+                        'button[data-type="custom-button"]'
+                    ) as HTMLElement | null;
+
+                    if (!btn) {
+                        return false;
+                    }
+
+                    return {
+                        label: btn.getAttribute("data-label") || "New Button",
+                        id: btn.getAttribute("data-id"),
+                        buttonSize: (btn.getAttribute("data-size") as ButtonSize) || "md",
+                        buttonColor: (btn.getAttribute("data-color") as ButtonColor) || "primary",
+                        buttonAlignment: align,
+                    };
                 },
             },
         ];
     },
 
     renderHTML({ HTMLAttributes }) {
-        const id = HTMLAttributes["data-id"];
-        const label = HTMLAttributes["data-label"] || "New Button";
-        const buttonSize = HTMLAttributes["data-size"] || "md";
-        const buttonColor = HTMLAttributes["data-color"] || "primary";
-        const buttonAlignment = HTMLAttributes["data-align"] || "left";
+        const align = HTMLAttributes["data-align"] || "left";
 
-        const alignmentClass = `text-${buttonAlignment}`;
-        const displayClass =
-            buttonAlignment === "center" || buttonAlignment === "right" ? "block" : "inline-block";
+        const buttonAttrs = mergeAttributes(HTMLAttributes, {
+            "data-type": "custom-button",
+            "data-size": HTMLAttributes["data-size"] || "md",
+            "data-color": HTMLAttributes["data-color"] || "primary",
+            "data-id": HTMLAttributes["data-id"] || "",
+            onclick: `console.log("Button clicked: ${HTMLAttributes["data-id"]}");`,
+        });
 
         return [
-            "button",
-            mergeAttributes(HTMLAttributes, {
-                "data-type": "custom-button",
-                "data-size": buttonSize,
-                "data-color": buttonColor,
-                "data-align": buttonAlignment,
-                class: `${displayClass} ${alignmentClass} custom-preview-button-${buttonSize} custom-preview-button-${buttonColor}`,
-                onclick: `console.log(${JSON.stringify(`Button clicked: ${id}`)});`,
-            }),
-            label,
+            "div",
+            { "data-align": align },
+            ["button", buttonAttrs, HTMLAttributes["data-label"] || "New Button"],
         ];
     },
 
@@ -118,8 +121,8 @@ export const CustomButton = Node.create({
         return {
             addCustomButton:
                 (attrs = {}) =>
-                ({ chain }) => {
-                    return chain()
+                ({ chain }) =>
+                    chain()
                         .insertContent({
                             type: this.name,
                             attrs: {
@@ -132,8 +135,8 @@ export const CustomButton = Node.create({
                                 buttonAlignment: attrs.buttonAlignment ?? "left",
                             },
                         })
-                        .run();
-                },
+                        .run(),
+
             updateCustomButton:
                 (attrs: {
                     label?: string;
@@ -141,28 +144,38 @@ export const CustomButton = Node.create({
                     buttonColor?: ButtonColor;
                     buttonAlignment?: ButtonAlignment;
                 }) =>
-                ({ editor, tr }) => {
-                    const { selection } = editor.state;
+                ({ tr, dispatch, state }) => {
+                    const { selection } = state;
                     const { from, to, empty } = selection;
+                    let updated = false;
 
                     if (empty) {
-                        const node = editor.state.doc.nodeAt(from);
+                        const node = state.doc.nodeAt(from);
                         if (node && node.type.name === this.name) {
-                            editor.commands.setNode(this.name, { ...node.attrs, ...attrs });
+                            dispatch!(
+                                tr.setNodeMarkup(from, undefined, {
+                                    ...node.attrs,
+                                    ...attrs,
+                                })
+                            );
                             return true;
                         }
                     }
 
-                    let updated = false;
-                    editor.state.doc.nodesBetween(from, to, (node, pos) => {
+                    state.doc.nodesBetween(from, to, (node, pos) => {
                         if (node.type.name === this.name) {
-                            tr.setNodeMarkup(pos, undefined, { ...node.attrs, ...attrs });
+                            tr.setNodeMarkup(pos, undefined, {
+                                ...node.attrs,
+                                ...attrs,
+                            });
                             updated = true;
                         }
                     });
-                    if (updated) {
-                        editor.view.dispatch(tr);
+
+                    if (updated && dispatch) {
+                        dispatch(tr);
                     }
+
                     return updated;
                 },
         };

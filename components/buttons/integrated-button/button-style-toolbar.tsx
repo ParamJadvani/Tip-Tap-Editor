@@ -20,15 +20,6 @@ import { ButtonAlignment, ButtonColor, ButtonSize } from "@/extensions/custom-no
 const isCustomButtonSelected = (editor: Editor | null) => {
     if (!editor) return false;
     const { selection } = editor.state;
-    const { from } = selection;
-
-    const node = editor.state.doc.nodeAt(from);
-
-    // If the node at the cursor is a custom button
-    if (node && node.type.name === "customButton") {
-        return true;
-    }
-
     let isSelectedInNode = false;
     editor.state.doc.nodesBetween(selection.from, selection.to, (node) => {
         if (node.type.name === "customButton") {
@@ -36,31 +27,32 @@ const isCustomButtonSelected = (editor: Editor | null) => {
             return false;
         }
     });
-
     return isSelectedInNode;
 };
 
 export const ButtonStylesToolbar = () => {
     const { editor, activeCustomButtonNodeId, setActiveCustomButtonNodeId } = useEditorStore();
 
-    const selectedNode = activeCustomButtonNodeId
-        ? editor?.state.doc.nodeAt(
-              editor.view?.posAtDOM(
-                  editor.view.dom.querySelector(`[data-button-id="${activeCustomButtonNodeId}"]`) ||
-                      document.body,
-                  0
-              )
-          )
-        : null;
+    // safely resolve the selected node (or null)
+    let selectedNode = null;
+    if (editor && editor.view && activeCustomButtonNodeId) {
+        const domNode = editor.view.dom.querySelector(
+            `[data-button-id="${activeCustomButtonNodeId}"]`
+        );
+        if (domNode) {
+            const pos = editor.view.posAtDOM(domNode, 0);
+            selectedNode = editor.state.doc.nodeAt(pos);
+        }
+    }
 
-    const currentSize = selectedNode?.attrs.buttonSize || "md";
-    const currentColor = selectedNode?.attrs.buttonColor || "primary";
-    const currentAlignment = selectedNode?.attrs.buttonAlignment || "left";
+    const currentSize = (selectedNode?.attrs.buttonSize as ButtonSize) || "md";
+    const currentColor = (selectedNode?.attrs.buttonColor as ButtonColor) || "primary";
+    const currentAlignment = (selectedNode?.attrs.buttonAlignment as ButtonAlignment) || "left";
 
     const updateButton = useCallback(
         (attrs: {
-            label?: string | undefined;
-            buttonSize?: ButtonSize | undefined;
+            label?: string;
+            buttonSize?: ButtonSize;
             buttonColor?: ButtonColor;
             buttonAlignment?: ButtonAlignment;
         }) => {
@@ -101,15 +93,14 @@ export const ButtonStylesToolbar = () => {
                         <DropdownMenuSubContent>
                             <DropdownMenuLabel>Button Size</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => updateButton({ buttonSize: "sm" })}>
-                                Small
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateButton({ buttonSize: "md" })}>
-                                Medium
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateButton({ buttonSize: "lg" })}>
-                                Large
-                            </DropdownMenuItem>
+                            {["sm", "md", "lg"].map((size) => (
+                                <DropdownMenuItem
+                                    key={size}
+                                    onClick={() => updateButton({ buttonSize: size as ButtonSize })}
+                                >
+                                    {size.charAt(0).toUpperCase() + size.slice(1)}
+                                </DropdownMenuItem>
+                            ))}
                         </DropdownMenuSubContent>
                     </DropdownMenuSub>
 
@@ -158,21 +149,23 @@ export const ButtonStylesToolbar = () => {
                         <DropdownMenuSubContent>
                             <DropdownMenuLabel>Button Alignment</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => updateButton({ buttonAlignment: "left" })}
-                            >
-                                <AlignLeft className="h-4 w-4 mr-2" /> Left
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => updateButton({ buttonAlignment: "center" })}
-                            >
-                                <AlignCenter className="h-4 w-4 mr-2" /> Center
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => updateButton({ buttonAlignment: "right" })}
-                            >
-                                <AlignRight className="h-4 w-4 mr-2" /> Right
-                            </DropdownMenuItem>
+                            {(["left", "center", "right"] as ButtonAlignment[]).map((align) => {
+                                const Icon =
+                                    align === "left"
+                                        ? AlignLeft
+                                        : align === "center"
+                                        ? AlignCenter
+                                        : AlignRight;
+                                return (
+                                    <DropdownMenuItem
+                                        key={align}
+                                        onClick={() => updateButton({ buttonAlignment: align })}
+                                    >
+                                        <Icon className="h-4 w-4 mr-2" />{" "}
+                                        {align.charAt(0).toUpperCase() + align.slice(1)}
+                                    </DropdownMenuItem>
+                                );
+                            })}
                         </DropdownMenuSubContent>
                     </DropdownMenuSub>
                 </DropdownMenuContent>
